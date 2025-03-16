@@ -16,6 +16,12 @@ class RepositoryServiceProvider extends ServiceProvider
             \App\Repositories\BaseRepository::class
         );
 
+        $this->app->bind(
+            \App\Repositories\UserRepository::class,
+            function ($app) {
+                return new \App\Repositories\UserRepository(new \App\Models\User());
+            }
+        );
     }
 
     /**
