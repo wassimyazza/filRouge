@@ -24,5 +24,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // User routes
     Route::get('/user', [UserController::class, 'profile']);
     Route::put('/user', [UserController::class, 'updateProfile']);
-    
+    Route::put('/user/password', [UserController::class, 'changePassword']);
+
 });

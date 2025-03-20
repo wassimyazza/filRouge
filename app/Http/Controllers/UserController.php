@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\UserRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,19 +14,16 @@ class UserController extends Controller
 {
     protected $userRepository;
 
-    public function __construct(UserRepository $userRepository)
-    {
+    public function __construct(UserRepository $userRepository){
         $this->userRepository = $userRepository;
     }
 
-    public function profile()
-    {
+    public function profile(){
         $user = Auth::user();
         return response()->json(['user' => $user]);
     }
 
-    public function updateProfile(Request $request)
-    {
+    public function updateProfile(Request $request){
         $user = Auth::user();
         
         $validator = Validator::make($request->all(), [
@@ -56,6 +54,33 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Profile updated successfully',
             'user' => $this->userRepository->find($user->id)
+        ]);
+    }
+
+    public function changePassword(Request $request){
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect'
+            ], 422);
+        }
+
+        $this->userRepository->update($user->id, [
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'message' => 'Password changed successfully'
         ]);
     }
 

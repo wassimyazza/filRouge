@@ -2,8 +2,7 @@
 
 namespace App\Repositories;
 
-interface BaseRepositoryInterface
-{
+interface BaseRepositoryInterface{
     public function all();
     public function find($id);
     public function create(array $data);

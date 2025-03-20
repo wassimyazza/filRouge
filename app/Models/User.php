@@ -32,20 +32,17 @@ class User extends Authenticatable
     ];
 
 
-    public function isAdmin()
-    {
+    public function isAdmin(){
         return $this->role === 'admin';
     }
 
 
-    public function isHost()
-    {
+    public function isHost(){
         return $this->role === 'host';
     }
 
 
-    public function isTraveler()
-    {
+    public function isTraveler(){
         return $this->role === 'traveler';
     }
 }

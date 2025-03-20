@@ -10,17 +10,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller
-{
+class AuthController extends Controller{
     protected $userRepository;
 
-    public function __construct(UserRepository $userRepository)
-    {
+    public function __construct(UserRepository $userRepository){
         $this->userRepository = $userRepository;
     }
 
-    public function register(Request $request)
-    {
+    public function register(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -48,8 +45,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
-    {
+    public function login(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -83,8 +79,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request)
-    {
+    public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
@@ -92,8 +87,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function forgotPassword(Request $request)
-    {
+    public function forgotPassword(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|exists:users,email',
         ]);
