@@ -15,9 +15,8 @@ class PropertyImage extends Model
         'is_main',
     ];
 
-    // Relationships
-    public function property()
-    {
+
+    public function property(){
         return $this->belongsTo(Property::class);
     }
 }

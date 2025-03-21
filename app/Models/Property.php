@@ -24,13 +24,11 @@ class Property extends Model
         'is_approved',
     ];
 
-    public function host()
-    {
+    public function host(){
         return $this->belongsTo(User::class, 'host_id');
     }
 
-    public function images()
-    {
+    public function images(){
         return $this->hasMany(PropertyImage::class);
     }
 }
