@@ -19,6 +19,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 // Property public routes
 Route::get('/properties', [PropertyController::class, 'index']);
+Route::get('/properties/{id}', [PropertyController::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

@@ -10,4 +10,9 @@ class PropertyImageRepository extends BaseRepository{
         parent::__construct($model);
     }
 
+    public function getImagesByProperty($propertyId)
+    {
+        return $this->model->where('property_id', $propertyId)->get();
+    }
+
 }

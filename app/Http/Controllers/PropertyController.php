@@ -27,4 +27,17 @@ class PropertyController extends Controller
 
         return response()->json(['properties' => $properties]);
     }
+
+    public function show($id)
+    {
+        $property = $this->propertyRepository->find($id);
+        
+        if (!$property) {
+            return response()->json(['message' => 'Property not found'], 404);
+        }
+
+        $property->images = $this->propertyImageRepository->getImagesByProperty($property->id);
+
+        return response()->json(['property' => $property]);
+    }
 }
