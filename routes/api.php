@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Property routes for hosts
     Route::middleware('role:host')->group(function () {
         Route::post('/properties', [PropertyController::class, 'store']);
+        Route::put('/properties/{id}', [PropertyController::class, 'update']);
     });
 
 });

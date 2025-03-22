@@ -67,7 +67,6 @@ class PropertyController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Create property
         $property = $this->propertyRepository->create([
             'host_id' => $user->id,
             'title' => $request->title,
@@ -83,7 +82,6 @@ class PropertyController extends Controller
             'is_approved' => false, // Requires admin approval
         ]);
 
-        // Upload and save images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
                 $imageName = time() . '_' . $index . '.' . $image->extension();
@@ -101,5 +99,61 @@ class PropertyController extends Controller
             'message' => 'Property created successfully and pending approval',
             'property' => $property
         ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        $property = $this->propertyRepository->find($id);
+        
+        if (!$property) {
+            return response()->json(['message' => 'Property not found'], 404);
+        }
+
+        if ($property->host_id !== $user->id && !$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'type' => 'sometimes|string|max:50',
+            'city' => 'sometimes|string|max:100',
+            'address' => 'sometimes|string|max:255',
+            'price_per_night' => 'sometimes|numeric|min:0',
+            'capacity' => 'sometimes|integer|min:1',
+            'bedrooms' => 'sometimes|integer|min:0',
+            'bathrooms' => 'sometimes|integer|min:0',
+            'is_available' => 'sometimes|boolean',
+            'new_images' => 'sometimes|array',
+            'new_images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $this->propertyRepository->update($id, $request->only([
+            'title', 'description', 'type', 'city', 'address',
+            'price_per_night', 'capacity', 'bedrooms', 'bathrooms', 'is_available'
+        ]));
+
+        if ($request->hasFile('new_images')) {
+            foreach ($request->file('new_images') as $index => $image) {
+                $imageName = time() . '_' . $index . '.' . $image->extension();
+                $image->storeAs('public/properties', $imageName);
+                
+                $this->propertyImageRepository->create([
+                    'property_id' => $property->id,
+                    'image_path' => $imageName,
+                    'is_main' => false,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Property updated successfully',
+            'property' => $this->propertyRepository->find($id)
+        ]);
     }
 }
