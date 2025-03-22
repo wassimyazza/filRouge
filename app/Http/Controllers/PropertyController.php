@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Repositories\PropertyRepository;
-use App\Repositories\PropertyImageRepository;
 use Illuminate\Support\Facades\Validator;
+use App\Repositories\PropertyImageRepository;
 
 class PropertyController extends Controller
 {
@@ -101,8 +102,7 @@ class PropertyController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
         $user = Auth::user();
         $property = $this->propertyRepository->find($id);
         
@@ -155,5 +155,45 @@ class PropertyController extends Controller
             'message' => 'Property updated successfully',
             'property' => $this->propertyRepository->find($id)
         ]);
+    }
+
+    public function destroy($id){
+        $user = Auth::user();
+        $property = $this->propertyRepository->find($id);
+        
+        if (!$property) {
+            return response()->json(['message' => 'Property not found'], 404);
+        }
+
+        if ($property->host_id !== $user->id && !$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $images = $this->propertyImageRepository->getImagesByProperty($id);
+        foreach ($images as $image) {
+            Storage::delete('public/properties/' . $image->image_path);
+            $this->propertyImageRepository->delete($image->id);
+        }
+
+        $this->propertyRepository->delete($id);
+
+        return response()->json(['message' => 'Property deleted successfully']);
+    }
+
+    public function myProperties()
+    {
+        $user = Auth::user();
+        
+        if (!$user->isHost()) {
+            return response()->json(['message' => 'Only hosts can access their properties'], 403);
+        }
+
+        $properties = $this->propertyRepository->getPropertiesByHost($user->id);
+
+        foreach ($properties as $property) {
+            $property->main_image = $this->propertyImageRepository->getMainImage($property->id);
+        }
+
+        return response()->json(['properties' => $properties]);
     }
 }

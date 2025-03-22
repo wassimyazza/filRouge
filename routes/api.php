@@ -35,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:host')->group(function () {
         Route::post('/properties', [PropertyController::class, 'store']);
         Route::put('/properties/{id}', [PropertyController::class, 'update']);
+        Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+        Route::get('/my-properties', [PropertyController::class, 'myProperties']);
     });
 
 });

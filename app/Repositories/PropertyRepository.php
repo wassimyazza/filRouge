@@ -38,4 +38,8 @@ class PropertyRepository extends BaseRepository
 
         return $query->get();
     }
+
+    public function getPropertiesByHost($hostId){
+        return $this->model->where('host_id', $hostId)->get();
+    }
 }
