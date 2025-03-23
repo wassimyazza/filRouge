@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
         Route::get('/my-properties', [PropertyController::class, 'myProperties']);
     });
-    
+
+
+    // Reservation routes
+    Route::get('/reservations', [ReservationController::class, 'index']);
 
 });
