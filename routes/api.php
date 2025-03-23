@@ -45,4 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::get('/reservations/{id}', [ReservationController::class, 'show']);
 
+    // Reservation routes for travelers
+    Route::middleware('role:traveler')->group(function () {
+        Route::post('/reservations', [ReservationController::class, 'store']);
+    });
+
 });

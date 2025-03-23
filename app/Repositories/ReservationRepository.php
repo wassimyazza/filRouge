@@ -22,4 +22,17 @@ class ReservationRepository extends BaseRepository{
         })->get();
     }
 
+    public function checkAvailability($propertyId, $checkInDate, $checkOutDate){
+        $checkIn = Carbon::parse($checkInDate);
+        $checkOut = Carbon::parse($checkOutDate);
+
+        $conflictingReservations = $this->model->where('property_id', $propertyId)->where('status', '!=', 'cancelled')->where(function ($query) use ($checkIn, $checkOut) {
+                $query->whereBetween('check_in_date', [$checkIn, $checkOut])->orWhereBetween('check_out_date', [$checkIn, $checkOut])->orWhere(function ($q) use ($checkIn, $checkOut) {
+                        $q->where('check_in_date', '<=', $checkIn)->where('check_out_date', '>=', $checkOut);
+                    });
+            })->count();
+
+        return $conflictingReservations === 0;
+    }
+
 }

@@ -7,6 +7,8 @@ use App\Repositories\ReservationRepository;
 use App\Repositories\PropertyRepository;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 
 class ReservationController extends Controller{
 
@@ -41,8 +43,7 @@ class ReservationController extends Controller{
         return response()->json(['reservations' => $reservations]);
     }
 
-    public function show($id)
-    {
+    public function show($id){
         $user = Auth::user();
         $reservation = $this->reservationRepository->find($id);
         
@@ -62,6 +63,67 @@ class ReservationController extends Controller{
         $reservation->traveler = $reservation->traveler;
 
         return response()->json(['reservation' => $reservation]);
+    }
+
+
+    public function store(Request $request){
+        $user = Auth::user();
+        
+        if (!$user->isTraveler()) {
+            return response()->json(['message' => 'Only travelers can make reservations'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'property_id' => 'required|exists:properties,id',
+            'check_in_date' => 'required|date|after_or_equal:today',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'guests_count' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $property = $this->propertyRepository->find($request->property_id);
+        
+        if (!$property) {
+            return response()->json(['message' => 'Property not found'], 404);
+        }
+
+        if (!$property->is_available || !$property->is_approved) {
+            return response()->json(['message' => 'Property is not available for booking'], 400);
+        }
+
+        if ($property->capacity < $request->guests_count) {
+            return response()->json(['message' => 'Property capacity exceeded'], 400);
+        }
+
+        $isAvailable = $this->reservationRepository->checkAvailability($request->property_id,$request->check_in_date,$request->check_out_date);
+
+        if (!$isAvailable) {
+            return response()->json(['message' => 'Property is not available for the selected dates'], 400);
+        }
+
+        $checkIn = Carbon::parse($request->check_in_date);
+        $checkOut = Carbon::parse($request->check_out_date);
+        $nights = $checkIn->diffInDays($checkOut);
+        $totalPrice = $property->price_per_night * $nights;
+
+        $reservation = $this->reservationRepository->create([
+            'property_id' => $request->property_id,
+            'traveler_id' => $user->id,
+            'check_in_date' => $request->check_in_date,
+            'check_out_date' => $request->check_out_date,
+            'guests_count' => $request->guests_count,
+            'total_price' => $totalPrice,
+            'status' => 'pending', // Initial status
+        ]);
+
+        return response()->json([
+            'message' => 'Reservation created successfully',
+            'reservation' => $reservation,
+            'payment_required' => true
+        ], 201);
     }
 
 }
