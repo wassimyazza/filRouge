@@ -38,5 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
         Route::get('/my-properties', [PropertyController::class, 'myProperties']);
     });
+    
 
 });
