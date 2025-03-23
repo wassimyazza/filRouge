@@ -43,5 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reservation routes
     Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::get('/reservations/{id}', [ReservationController::class, 'show']);
 
 });

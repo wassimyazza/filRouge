@@ -41,4 +41,27 @@ class ReservationController extends Controller{
         return response()->json(['reservations' => $reservations]);
     }
 
+    public function show($id)
+    {
+        $user = Auth::user();
+        $reservation = $this->reservationRepository->find($id);
+        
+        if (!$reservation) {
+            return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        if ($user->isTraveler() && $reservation->traveler_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($user->isHost() && $reservation->property->host_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $reservation->property = $reservation->property;
+        $reservation->traveler = $reservation->traveler;
+
+        return response()->json(['reservation' => $reservation]);
+    }
+
 }
