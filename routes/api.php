@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,5 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:host')->group(function () {
         Route::put('/reservations/{id}', [ReservationController::class, 'update']);
     });
+
+    // Transaction routes
+    Route::get('/transactions', [TransactionController::class, 'getTransactions']);
 
 });
