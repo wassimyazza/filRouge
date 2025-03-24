@@ -14,10 +14,12 @@ class ReservationController extends Controller{
 
     protected $reservationRepository;
     protected $propertyRepository;
+    protected $transactionRepository;
 
-    public function __construct(ReservationRepository $reservationRepository,PropertyRepository $propertyRepository,) {
+    public function __construct(ReservationRepository $reservationRepository,PropertyRepository $propertyRepository,TransactionRepository $transactionRepository) {
         $this->reservationRepository = $reservationRepository;
         $this->propertyRepository = $propertyRepository;
+        $this->transactionRepository = $transactionRepository;
     }
     
     public function index(){
