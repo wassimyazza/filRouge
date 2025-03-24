@@ -14,7 +14,6 @@ class ReservationController extends Controller{
 
     protected $reservationRepository;
     protected $propertyRepository;
-    protected $transactionRepository;
 
     public function __construct(ReservationRepository $reservationRepository,PropertyRepository $propertyRepository,) {
         $this->reservationRepository = $reservationRepository;
@@ -168,6 +167,34 @@ class ReservationController extends Controller{
         return response()->json([
             'message' => 'Reservation status updated successfully',
             'reservation' => $this->reservationRepository->find($id)
+        ]);
+    }
+
+
+    public function cancel($id){
+        $user = Auth::user();
+        $reservation = $this->reservationRepository->find($id);
+        
+        if (!$reservation) {
+            return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        if ($reservation->traveler_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($reservation->status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending reservations can be cancelled'
+            ], 400);
+        }
+
+        $this->reservationRepository->update($id, [
+            'status' => 'cancelled'
+        ]);
+
+        return response()->json([
+            'message' => 'Reservation cancelled successfully'
         ]);
     }
 
