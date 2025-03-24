@@ -48,6 +48,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reservation routes for travelers
     Route::middleware('role:traveler')->group(function () {
         Route::post('/reservations', [ReservationController::class, 'store']);
+        Route::put('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+    });
+
+    // Reservation routes for hosts
+    Route::middleware('role:host')->group(function () {
+        Route::put('/reservations/{id}', [ReservationController::class, 'update']);
     });
 
 });

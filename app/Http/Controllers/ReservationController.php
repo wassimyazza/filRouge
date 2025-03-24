@@ -126,4 +126,49 @@ class ReservationController extends Controller{
         ], 201);
     }
 
+    public function update(Request $request, $id){
+        $user = Auth::user();
+        $reservation = $this->reservationRepository->find($id);
+        
+        if (!$reservation) {
+            return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        if (!$user->isAdmin() && !($user->isHost() && $reservation->property->host_id === $user->id)) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:confirmed,cancelled',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if ($reservation->status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending reservations can be updated'
+            ], 400);
+        }
+
+        $this->reservationRepository->update($id, [
+            'status' => $request->status
+        ]);
+
+        if ($request->status === 'cancelled') {
+            $transaction = $this->transactionRepository->getTransactionsByReservation($id);
+            if ($transaction && $transaction->status === 'completed') {
+                $this->transactionRepository->update($transaction->id, [
+                    'status' => 'refunded'
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Reservation status updated successfully',
+            'reservation' => $this->reservationRepository->find($id)
+        ]);
+    }
+
 }
