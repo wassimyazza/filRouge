@@ -60,4 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Transaction routes
     Route::get('/transactions', [TransactionController::class, 'getTransactions']);
 
+    // Transaction routes for travelers
+    Route::middleware('role:traveler')->group(function () {
+        Route::post('/payment/intent', [TransactionController::class, 'createPaymentIntent']);
+    });
+
 });
