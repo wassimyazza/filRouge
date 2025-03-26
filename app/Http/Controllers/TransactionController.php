@@ -85,10 +85,9 @@ class TransactionController extends Controller
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         try {
-            // Create a PaymentIntent
             $paymentIntent = PaymentIntent::create([
-                'amount' => $reservation->total_price * 100, // Amount in cents
-                'currency' => 'mad', // Moroccan Dirham
+                'amount' => $reservation->total_price * 100,
+                'currency' => 'mad',
                 'metadata' => [
                     'reservation_id' => $reservation->id,
                     'property_id' => $reservation->property_id,
@@ -96,7 +95,6 @@ class TransactionController extends Controller
                 ],
             ]);
 
-            // Create transaction record
             $transaction = $this->transactionRepository->create([
                 'reservation_id' => $reservation->id,
                 'amount' => $reservation->total_price,
@@ -111,6 +109,50 @@ class TransactionController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error creating payment: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+    public function confirmPayment(Request $request){
+        $validator = Validator::make($request->all(), [
+            'payment_intent_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        try {
+            $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
+            
+            if ($paymentIntent->status !== 'succeeded') {
+                return response()->json(['message' => 'Payment not successful'], 400);
+            }
+
+            $transaction = $this->transactionRepository->getTransactionsByReservation(
+                $paymentIntent->metadata->reservation_id
+            );
+
+            if (!$transaction) {
+                return response()->json(['message' => 'Transaction not found'], 404);
+            }
+
+            $this->transactionRepository->update($transaction->id, [
+                'status' => 'completed'
+            ]);
+
+            $this->reservationRepository->update($paymentIntent->metadata->reservation_id, [
+                'status' => 'confirmed'
+            ]);
+
+            return response()->json([
+                'message' => 'Payment confirmed successfully',
+                'transaction' => $this->transactionRepository->find($transaction->id)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error confirming payment: ' . $e->getMessage()], 500);
         }
     }
 

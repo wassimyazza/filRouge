@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Transaction routes for travelers
     Route::middleware('role:traveler')->group(function () {
         Route::post('/payment/intent', [TransactionController::class, 'createPaymentIntent']);
+        Route::post('/payment/confirm', [TransactionController::class, 'confirmPayment']);
     });
 
 });
