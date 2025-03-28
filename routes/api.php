@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
@@ -22,6 +23,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 // Property routes
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
+Route::get('/properties/{id}/reviews', [ReviewController::class, 'index']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
