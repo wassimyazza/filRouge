@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Repositories\ReservationRepository;
 use App\Repositories\PropertyRepository;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
+use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class ReservationController extends Controller{
-
     protected $reservationRepository;
     protected $propertyRepository;
     protected $transactionRepository;
@@ -21,7 +21,7 @@ class ReservationController extends Controller{
         $this->propertyRepository = $propertyRepository;
         $this->transactionRepository = $transactionRepository;
     }
-    
+
     public function index(){
         $user = Auth::user();
         
@@ -62,10 +62,10 @@ class ReservationController extends Controller{
 
         $reservation->property = $reservation->property;
         $reservation->traveler = $reservation->traveler;
+        $reservation->transaction = $reservation->transaction;
 
         return response()->json(['reservation' => $reservation]);
     }
-
 
     public function store(Request $request){
         $user = Auth::user();
@@ -99,7 +99,11 @@ class ReservationController extends Controller{
             return response()->json(['message' => 'Property capacity exceeded'], 400);
         }
 
-        $isAvailable = $this->reservationRepository->checkAvailability($request->property_id,$request->check_in_date,$request->check_out_date);
+        $isAvailable = $this->reservationRepository->checkAvailability(
+            $request->property_id,
+            $request->check_in_date,
+            $request->check_out_date
+        );
 
         if (!$isAvailable) {
             return response()->json(['message' => 'Property is not available for the selected dates'], 400);
@@ -135,7 +139,8 @@ class ReservationController extends Controller{
             return response()->json(['message' => 'Reservation not found'], 404);
         }
 
-        if (!$user->isAdmin() && !($user->isHost() && $reservation->property->host_id === $user->id)) {
+        if (!$user->isAdmin() && 
+            !($user->isHost() && $reservation->property->host_id === $user->id)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -172,7 +177,6 @@ class ReservationController extends Controller{
         ]);
     }
 
-
     public function cancel($id){
         $user = Auth::user();
         $reservation = $this->reservationRepository->find($id);
@@ -195,9 +199,15 @@ class ReservationController extends Controller{
             'status' => 'cancelled'
         ]);
 
+        $transaction = $this->transactionRepository->getTransactionsByReservation($id);
+        if ($transaction && $transaction->status === 'completed') {
+            $this->transactionRepository->update($transaction->id, [
+                'status' => 'refunded'
+            ]);
+        }
+
         return response()->json([
             'message' => 'Reservation cancelled successfully'
         ]);
     }
-
 }

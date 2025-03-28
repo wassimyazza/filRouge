@@ -68,4 +68,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/payment/confirm', [TransactionController::class, 'confirmPayment']);
     });
 
+    // Review routes for travelers
+    Route::middleware('role:traveler')->group(function () {
+        Route::post('/reviews', [ReviewController::class, 'store']);
+    });    
+
 });
