@@ -74,4 +74,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
     });    
 
+    // Admin routes
+    Route::middleware('role:admin')->group(function () {
+        Route::put('/admin/reviews/{id}/approve', [ReviewController::class, 'approve']);
+    });
+
 });

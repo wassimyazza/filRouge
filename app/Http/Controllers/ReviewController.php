@@ -83,8 +83,7 @@ class ReviewController extends Controller
         ], 201);
     }
 
-    public function destroy($id)
-    {
+    public function destroy($id){
         $user = Auth::user();
         $review = $this->reviewRepository->find($id);
         
@@ -101,6 +100,29 @@ class ReviewController extends Controller
         return response()->json(['message' => 'Review deleted successfully']);
     }
 
+
+    public function approve($id){
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Only admins can approve reviews'], 403);
+        }
+
+        $review = $this->reviewRepository->find($id);
+        
+        if (!$review) {
+            return response()->json(['message' => 'Review not found'], 404);
+        }
+
+        $this->reviewRepository->update($id, [
+            'is_approved' => true
+        ]);
+
+        return response()->json([
+            'message' => 'Review approved successfully',
+            'review' => $this->reviewRepository->find($id)
+        ]);
+    }
 
 
 
