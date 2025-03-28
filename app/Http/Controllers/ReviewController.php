@@ -74,7 +74,7 @@ class ReviewController extends Controller
             'traveler_id' => $user->id,
             'rating' => $request->rating,
             'comment' => $request->comment,
-            'is_approved' => false, // Requires admin approval
+            'is_approved' => false,
         ]);
 
         return response()->json([
@@ -82,5 +82,26 @@ class ReviewController extends Controller
             'review' => $review
         ], 201);
     }
+
+    public function destroy($id)
+    {
+        $user = Auth::user();
+        $review = $this->reviewRepository->find($id);
+        
+        if (!$review) {
+            return response()->json(['message' => 'Review not found'], 404);
+        }
+
+        if (!$user->isAdmin() && $review->traveler_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $this->reviewRepository->delete($id);
+
+        return response()->json(['message' => 'Review deleted successfully']);
+    }
+
+
+
 
 }
