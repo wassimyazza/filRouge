@@ -77,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin routes
     Route::middleware('role:admin')->group(function () {
         Route::put('/admin/reviews/{id}/approve', [ReviewController::class, 'approve']);
+        Route::get('/admin/reviews/pending', [ReviewController::class, 'getPendingReviews']);
     });
 
 });

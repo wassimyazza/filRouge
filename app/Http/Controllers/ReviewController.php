@@ -125,5 +125,21 @@ class ReviewController extends Controller
     }
 
 
+    public function getPendingReviews(){
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $reviews = $this->reviewRepository->getPendingReviews();
+        
+        foreach ($reviews as $review) {
+            $review->traveler_name = $review->traveler->name;
+            $review->property_title = $review->property->title;
+        }
+
+        return response()->json(['reviews' => $reviews]);
+    }
 
 }
