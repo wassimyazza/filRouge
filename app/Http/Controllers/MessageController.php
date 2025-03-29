@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Repositories\MessageRepository;
-use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\MessageRepository;
+use Illuminate\Support\Facades\Validator;
 
 class MessageController extends Controller
 {
@@ -29,7 +30,6 @@ class MessageController extends Controller
 
         $messages = $this->messageRepository->getConversation($user->id, $userId);
         
-        // Mark messages as read
         foreach ($messages as $message) {
             if ($message->receiver_id === $user->id && !$message->is_read) {
                 $this->messageRepository->update($message->id, ['is_read' => true]);
@@ -44,6 +44,36 @@ class MessageController extends Controller
                 'profile_image' => $otherUser->profile_image
             ]
         ]);
+    }
+
+    public function sendMessage(Request $request){
+        
+        $validator = Validator::make($request->all(), [
+            'receiver_id' => 'required|exists:users,id',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = Auth::user();
+        
+        if ($user->id === (int)$request->receiver_id) {
+            return response()->json(['message' => 'Cannot send message to yourself'], 400);
+        }
+
+        $message = $this->messageRepository->create([
+            'sender_id' => $user->id,
+            'receiver_id' => $request->receiver_id,
+            'content' => $request->content,
+            'is_read' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Message sent successfully',
+            'data' => $message
+        ], 201);
     }
 
 }
