@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
@@ -79,5 +80,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/reviews/{id}/approve', [ReviewController::class, 'approve']);
         Route::get('/admin/reviews/pending', [ReviewController::class, 'getPendingReviews']);
     });
+
+
+    // Message routes
+    Route::get('/messages/{userId}', [MessageController::class, 'getConversation']);
 
 });
