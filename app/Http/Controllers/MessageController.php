@@ -75,5 +75,58 @@ class MessageController extends Controller
             'data' => $message
         ], 201);
     }
+    
+    public function getConversationList(){
+        $user = Auth::user();
+        $conversations = [];
+        $userIds = [];
+        
+        $sentMessages = $user->sentMessages;
+        $receivedMessages = $user->receivedMessages;
+
+        foreach ($sentMessages as $message) {
+            if (!in_array($message->receiver_id, $userIds)) {
+                $userIds[] = $message->receiver_id;
+            }
+        }
+        
+        foreach ($receivedMessages as $message) {
+            if (!in_array($message->sender_id, $userIds)) {
+                $userIds[] = $message->sender_id;
+            }
+        }
+        
+        foreach ($userIds as $userId) {
+            $otherUser = $this->userRepository->find($userId);
+            $messages = $this->messageRepository->getConversation($user->id, $userId);
+            
+            if (count($messages) > 0) {
+                $lastMessage = $messages->sortByDesc('created_at')->first();
+                $unreadCount = $messages->where('receiver_id', $user->id)
+                                       ->where('is_read', false)
+                                       ->count();
+                
+                $conversations[] = [
+                    'user' => [
+                        'id' => $otherUser->id,
+                        'name' => $otherUser->name,
+                        'profile_image' => $otherUser->profile_image
+                    ],
+                    'last_message' => [
+                        'content' => $lastMessage->content,
+                        'created_at' => $lastMessage->created_at,
+                        'is_from_me' => $lastMessage->sender_id === $user->id
+                    ],
+                    'unread_count' => $unreadCount
+                ];
+            }
+        }
+        
+        usort($conversations, function($a, $b) {
+            return strtotime($b['last_message']['created_at']) - strtotime($a['last_message']['created_at']);
+        });
+        
+        return response()->json(['conversations' => $conversations]);
+    } 
 
 }
