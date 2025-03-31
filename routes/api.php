@@ -93,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Withdrawal routes for hosts
     Route::middleware('role:host')->group(function () {
         Route::get('/withdrawals', [WithdrawalController::class, 'index']);
+        Route::post('/withdrawals', [WithdrawalController::class, 'store']);
     });
 
 });
