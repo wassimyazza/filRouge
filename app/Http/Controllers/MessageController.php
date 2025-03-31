@@ -83,7 +83,7 @@ class MessageController extends Controller
         
         $sentMessages = $user->sentMessages;
         $receivedMessages = $user->receivedMessages;
-
+        
         foreach ($sentMessages as $message) {
             if (!in_array($message->receiver_id, $userIds)) {
                 $userIds[] = $message->receiver_id;
@@ -102,9 +102,7 @@ class MessageController extends Controller
             
             if (count($messages) > 0) {
                 $lastMessage = $messages->sortByDesc('created_at')->first();
-                $unreadCount = $messages->where('receiver_id', $user->id)
-                                       ->where('is_read', false)
-                                       ->count();
+                $unreadCount = $messages->where('receiver_id', $user->id)->where('is_read', false)->count();
                 
                 $conversations[] = [
                     'user' => [
@@ -127,6 +125,6 @@ class MessageController extends Controller
         });
         
         return response()->json(['conversations' => $conversations]);
-    } 
+    }
 
 }
