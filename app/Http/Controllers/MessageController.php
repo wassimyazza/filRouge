@@ -127,4 +127,12 @@ class MessageController extends Controller
         return response()->json(['conversations' => $conversations]);
     }
 
+    public function getUnreadCount(){
+        $user = Auth::user();
+        $unreadMessages = $this->messageRepository->getUnreadMessages($user->id);
+        
+        return response()->json([
+            'unread_count' => count($unreadMessages)
+        ]);
+    }
 }

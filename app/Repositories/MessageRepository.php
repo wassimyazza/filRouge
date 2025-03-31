@@ -19,4 +19,8 @@ class MessageRepository extends BaseRepository{
         })->orderBy('created_at', 'asc')->get();
     }
 
+    public function getUnreadMessages($userId){
+        return $this->model->where('receiver_id', $userId)->where('is_read', false)->get();
+    }
+
 }
