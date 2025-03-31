@@ -16,9 +16,7 @@ class Withdrawal extends Model
         'bank_info',
     ];
 
-    // Relationships
-    public function host()
-    {
+    public function host(){
         return $this->belongsTo(User::class, 'host_id');
     }
 }

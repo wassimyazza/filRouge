@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
 
@@ -79,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::put('/admin/reviews/{id}/approve', [ReviewController::class, 'approve']);
         Route::get('/admin/reviews/pending', [ReviewController::class, 'getPendingReviews']);
+        Route::get('/admin/withdrawals', [WithdrawalController::class, 'index']);
     });
 
 
@@ -87,5 +89,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages', [MessageController::class, 'sendMessage']);
     Route::get('/messages/list/conversations', [MessageController::class, 'getConversationList']);
     Route::get('/messages/unread/conversation', [MessageController::class, 'getUnreadCount']);
+
+    // Withdrawal routes for hosts
+    Route::middleware('role:host')->group(function () {
+        Route::get('/withdrawals', [WithdrawalController::class, 'index']);
+    });
 
 });

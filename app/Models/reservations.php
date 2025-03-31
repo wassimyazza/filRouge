@@ -32,4 +32,12 @@ class Reservations extends Model
         return $this->belongsTo(User::class, 'traveler_id');
     }
 
+    public function transaction(){
+        return $this->hasOne(Transaction::class);
+    }
+
+    public function review(){
+        return $this->hasOne(Review::class);
+    }
+
 }

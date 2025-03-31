@@ -11,5 +11,8 @@ class WithdrawalRepository extends BaseRepository{
         parent::__construct($model);
     }
 
-    
+    public function getWithdrawalsByHost($hostId){
+        return $this->model->where('host_id', $hostId)->get();
+    }
+
 }

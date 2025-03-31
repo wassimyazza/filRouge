@@ -31,4 +31,20 @@ class Property extends Model
     public function images(){
         return $this->hasMany(PropertyImage::class);
     }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservations::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    // Get average rating
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
 }

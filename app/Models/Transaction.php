@@ -18,8 +18,7 @@ class Transaction extends Model
         'status', // pending, completed, failed, refunded
     ];
 
-    public function reservation()
-    {
+    public function reservation(){
         return $this->belongsTo(Reservations::class);
     }
 }
