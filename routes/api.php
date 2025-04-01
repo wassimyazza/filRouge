@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/reviews/{id}/approve', [ReviewController::class, 'approve']);
         Route::get('/admin/reviews/pending', [ReviewController::class, 'getPendingReviews']);
         Route::get('/admin/withdrawals', [WithdrawalController::class, 'index']);
+        Route::put('/admin/withdrawals/{id}/approve', [WithdrawalController::class, 'approve']);
     });
 
 

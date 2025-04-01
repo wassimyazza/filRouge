@@ -93,4 +93,31 @@ class WithdrawalController extends Controller{
         return $totalEarnings - $approvedWithdrawals;
     }
 
+
+    public function approve($id){
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Only admins can approve withdrawals'], 403);
+        }
+
+        $withdrawal = $this->withdrawalRepository->find($id);
+        
+        if (!$withdrawal) {
+            return response()->json(['message' => 'Withdrawal not found'], 404);
+        }
+
+        if ($withdrawal->status !== 'pending') {
+            return response()->json(['message' => 'Only pending withdrawals can be approved'], 400);
+        }
+
+        $this->withdrawalRepository->update($id, [
+            'status' => 'approved'
+        ]);
+
+        return response()->json([
+            'message' => 'Withdrawal approved successfully',
+            'withdrawal' => $this->withdrawalRepository->find($id)
+        ]);
+    }
 }
