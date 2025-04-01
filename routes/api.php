@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PropertyController;
@@ -83,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/withdrawals', [WithdrawalController::class, 'index']);
         Route::put('/admin/withdrawals/{id}/approve', [WithdrawalController::class, 'approve']);
         Route::put('/admin/withdrawals/{id}/reject', [WithdrawalController::class, 'reject']);
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     });
 
 
@@ -96,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:host')->group(function () {
         Route::get('/withdrawals', [WithdrawalController::class, 'index']);
         Route::post('/withdrawals', [WithdrawalController::class, 'store']);
+        Route::get('/balance', [WithdrawalController::class, 'getBalance']);
     });
 
 });

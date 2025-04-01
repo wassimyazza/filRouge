@@ -121,8 +121,7 @@ class WithdrawalController extends Controller{
         ]);
     }
 
-    public function reject($id)
-    {
+    public function reject($id){
         $user = Auth::user();
         
         if (!$user->isAdmin()) {

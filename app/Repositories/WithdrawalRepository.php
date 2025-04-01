@@ -15,4 +15,8 @@ class WithdrawalRepository extends BaseRepository{
         return $this->model->where('host_id', $hostId)->get();
     }
 
+    public function getPendingWithdrawals(){
+        return $this->model->where('status', 'pending')->get();
+    }
+
 }
