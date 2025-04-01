@@ -120,4 +120,32 @@ class WithdrawalController extends Controller{
             'withdrawal' => $this->withdrawalRepository->find($id)
         ]);
     }
+
+    public function reject($id)
+    {
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Only admins can reject withdrawals'], 403);
+        }
+
+        $withdrawal = $this->withdrawalRepository->find($id);
+        
+        if (!$withdrawal) {
+            return response()->json(['message' => 'Withdrawal not found'], 404);
+        }
+
+        if ($withdrawal->status !== 'pending') {
+            return response()->json(['message' => 'Only pending withdrawals can be rejected'], 400);
+        }
+
+        $this->withdrawalRepository->update($id, [
+            'status' => 'rejected'
+        ]);
+
+        return response()->json([
+            'message' => 'Withdrawal rejected successfully',
+            'withdrawal' => $this->withdrawalRepository->find($id)
+        ]);
+    }
 }
