@@ -98,4 +98,21 @@ class AdminController extends Controller
             'user' => $this->userRepository->find($id)
         ]);
     }
+
+    public function getPendingProperties(){
+        
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $properties = $this->propertyRepository->all()->where('is_approved', false);
+        
+        foreach ($properties as $property) {
+            $property->host_name = $property->host->name;
+        }
+
+        return response()->json(['properties' => $properties]);
+    }
 }

@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/admin/users', [AdminController::class, 'getUsers']);
         Route::put('/admin/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus']);
+        Route::get('/admin/properties/pending', [AdminController::class, 'getPendingProperties']);
     });
 
 
