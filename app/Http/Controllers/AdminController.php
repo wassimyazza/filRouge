@@ -54,7 +54,7 @@ class AdminController extends Controller
     }
 
     public function getUsers(Request $request){
-        
+
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
@@ -70,5 +70,32 @@ class AdminController extends Controller
         }
 
         return response()->json(['users' => $users]);
+    }
+
+    public function toggleUserStatus($id){
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $targetUser = $this->userRepository->find($id);
+        
+        if (!$targetUser) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($targetUser->isAdmin()) {
+            return response()->json(['message' => 'Cannot deactivate admin users'], 400);
+        }
+
+        $this->userRepository->update($id, [
+            'is_active' => !$targetUser->is_active
+        ]);
+
+        return response()->json([
+            'message' => 'User status updated successfully',
+            'user' => $this->userRepository->find($id)
+        ]);
     }
 }
