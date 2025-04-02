@@ -85,6 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/withdrawals/{id}/approve', [WithdrawalController::class, 'approve']);
         Route::put('/admin/withdrawals/{id}/reject', [WithdrawalController::class, 'reject']);
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/admin/users', [AdminController::class, 'getUsers']);
     });
 
 

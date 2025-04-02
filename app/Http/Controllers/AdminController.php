@@ -52,4 +52,23 @@ class AdminController extends Controller
 
         return response()->json(['stats' => $stats]);
     }
+
+    public function getUsers(Request $request){
+        
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $role = $request->query('role');
+        
+        if ($role) {
+            $users = $this->userRepository->getUsersByRole($role);
+        } else {
+            $users = $this->userRepository->all();
+        }
+
+        return response()->json(['users' => $users]);
+    }
 }
