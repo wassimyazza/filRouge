@@ -100,7 +100,7 @@ class AdminController extends Controller
     }
 
     public function getPendingProperties(){
-        
+
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
@@ -114,5 +114,29 @@ class AdminController extends Controller
         }
 
         return response()->json(['properties' => $properties]);
+    }
+
+    public function approveProperty($id){
+        
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $property = $this->propertyRepository->find($id);
+        
+        if (!$property) {
+            return response()->json(['message' => 'Property not found'], 404);
+        }
+
+        $this->propertyRepository->update($id, [
+            'is_approved' => true
+        ]);
+
+        return response()->json([
+            'message' => 'Property approved successfully',
+            'property' => $this->propertyRepository->find($id)
+        ]);
     }
 }
