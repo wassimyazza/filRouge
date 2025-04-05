@@ -164,7 +164,7 @@
 
 @section('content')
 <div class="bg-gray-50 min-h-screen pt-6 pb-12">
-    <div class="container mx-auto px-4">
+    <div class="container mx-auto px-8">
         <!-- Filter Section -->
         <div class="filter-section mb-8">
             <div class="filter-container p-6">

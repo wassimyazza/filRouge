@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
 use App\Repositories\PropertyRepository;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\PropertyImageRepository;
+use App\Repositories\ReviewRepository;
 
 class PropertyController extends Controller
 {
@@ -28,7 +30,12 @@ class PropertyController extends Controller
             $properties = $this->propertyRepository->getAvailableProperties();
         }
 
-        return response()->json(['properties' => $properties]);
+        foreach ($properties as $property) {
+            $property->main_image = $this->propertyImageRepository->getMainImage($property->id);
+            $property->avg_rating = $property->getAverageRatingAttribute();
+        }
+
+        return view('properties.index', compact('properties', 'filters'));
     }
 
     public function show($id){
