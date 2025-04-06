@@ -23,3 +23,11 @@ Route::get('/booking', function () {
 Route::get('/user/dashboard', function () {
     return view('client.dashboard');
 });
+
+Route::get('/login', function () {
+    return view('auth.login');
+});
+
+Route::get('/register', function () {
+    return view('auth.register');
+});
