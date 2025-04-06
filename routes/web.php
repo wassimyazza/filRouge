@@ -46,3 +46,46 @@ Route::get('/login', function () {
 Route::get('/register', function () {
     return view('auth.register');
 });
+
+
+// Owner routers
+
+Route::get('/owner/dashboard', function(){
+    return view('owner.owner-dashboard');
+});
+
+Route::get('/owner/listings', function(){
+    return view('owner.owner-listings');
+});
+
+Route::get('/owner/add-listing', function(){
+    return view('owner.owner-add-listing');
+});
+
+Route::get('/owner/reservations', function(){
+    return view('owner.owner-reservations');
+});
+
+Route::get('/owner/reviews', function(){
+    return view('owner.owner-reviews');
+});
+
+Route::get('/owner/earnings', function(){
+    return view('owner.owner-earnings');
+});
+
+Route::get('/owner/analytics', function(){
+    return view('owner.owner-analytics');
+});
+
+Route::get('/owner/messages', function(){
+    return view('owner.owner-messages');
+});
+
+Route::get('/owner/profile', function(){
+    return view('owner.owner-profile');
+});
+
+Route::get('/owner/settings', function(){
+    return view('owner.owner-settings');
+});
