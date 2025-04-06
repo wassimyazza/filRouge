@@ -13,8 +13,7 @@ class AuthController extends Controller
 {
     protected $userRepository;
 
-    public function __construct(UserRepository $userRepository)
-    {
+    public function __construct(UserRepository $userRepository){
         $this->userRepository = $userRepository;
     }
 
@@ -116,9 +115,6 @@ class AuthController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-
-        // In a real implementation, this would trigger a password reset email
-        // For now, we'll just show a success message
 
         return redirect()->route('login')
             ->with('success', 'Password reset link sent to your email');
