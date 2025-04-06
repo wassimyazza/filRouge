@@ -17,13 +17,11 @@ class AuthController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function showLoginForm()
-    {
+    public function showLoginForm(){
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
+    public function login(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -53,13 +51,11 @@ class AuthController extends Controller
             ->with('success', 'Login successful');
     }
 
-    public function showRegisterForm()
-    {
+    public function showRegisterForm(){
         return view('auth.register');
     }
 
-    public function register(Request $request)
-    {
+    public function register(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -89,8 +85,7 @@ class AuthController extends Controller
             ->with('success', 'Registration successful! Welcome to our platform.');
     }
 
-    public function logout(Request $request)
-    {
+    public function logout(Request $request){
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -99,13 +94,11 @@ class AuthController extends Controller
             ->with('success', 'Logged out successfully');
     }
 
-    public function showForgotPasswordForm()
-    {
+    public function showForgotPasswordForm(){
         return view('auth.forgot-password');
     }
 
-    public function forgotPassword(Request $request)
-    {
+    public function forgotPassword(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|exists:users,email',
         ]);
