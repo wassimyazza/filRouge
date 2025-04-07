@@ -52,22 +52,26 @@ class ReservationController extends Controller{
         $reservation = $this->reservationRepository->find($id);
         
         if (!$reservation) {
-            return response()->json(['message' => 'Reservation not found'], 404);
+            return redirect()->route('reservations.index')
+                ->with('error', 'Reservation not found');
         }
 
         if ($user->isTraveler() && $reservation->traveler_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('reservations.index')
+                ->with('error', 'Unauthorized access');
         }
 
         if ($user->isHost() && $reservation->property->host_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('host.reservations')
+                ->with('error', 'Unauthorized access');
         }
 
         $reservation->property = $reservation->property;
+        $reservation->property->main_image = $this->propertyImageRepository->getMainImage($reservation->property->id);
         $reservation->traveler = $reservation->traveler;
         $reservation->transaction = $reservation->transaction;
 
-        return response()->json(['reservation' => $reservation]);
+        return view('reservations.show', compact('reservation'));
     }
 
     public function store(Request $request){

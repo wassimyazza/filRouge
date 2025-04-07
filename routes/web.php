@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     // Reservations
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservations/{id}', [ReservationController::class, 'show'])->name('reservations.show');
+    Route::get('/messages/{userId}', [MessageController::class, 'getConversation'])->name('messages.conversation');
     
     // Messages
     Route::get('/messages', [MessageController::class, 'getConversationList'])->name('messages.index');
