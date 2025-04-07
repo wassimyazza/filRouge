@@ -23,23 +23,30 @@ class UserController extends Controller
         return view('user.profile', compact('user'));
     }
 
+    public function editProfile(){
+        $user = Auth::user();
+        return view('user.edit-profile', compact('user'));
+    }
+
     public function updateProfile(Request $request){
         $user = Auth::user();
         
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'phone' => 'sometimes|string|max:20',
-            'profile_image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $data = $request->only(['name', 'phone']);
 
         if ($request->hasFile('profile_image')) {
-            // Delete old image if exists
+            
             if ($user->profile_image) {
                 Storage::delete('public/profiles/' . $user->profile_image);
             }
@@ -51,10 +58,8 @@ class UserController extends Controller
 
         $this->userRepository->update($user->id, $data);
 
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => $this->userRepository->find($user->id)
-        ]);
+        return redirect()->route('profile')
+            ->with('success', 'Profile updated successfully');
     }
 
     public function changePassword(Request $request){
