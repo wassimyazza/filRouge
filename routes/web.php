@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Web\PropertyController;
 use App\Http\Controllers\Web\ReservationController;
@@ -45,6 +45,8 @@ Route::middleware(['auth'])->group(function () {
     
     // User profile
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
+    Route::get('/profile/password', [UserController::class, 'showChangePasswordForm'])->name('password.change');
     
     // Reservations
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');

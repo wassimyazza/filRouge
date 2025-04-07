@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -20,7 +20,7 @@ class UserController extends Controller
 
     public function profile(){
         $user = Auth::user();
-        return response()->json(['user' => $user]);
+        return view('user.profile', compact('user'));
     }
 
     public function updateProfile(Request $request){
