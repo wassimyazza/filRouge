@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::get('/profile/password', [UserController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [UserController::class, 'changePassword'])->name('password.update');
     
     // Reservations
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');

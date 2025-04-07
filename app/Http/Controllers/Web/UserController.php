@@ -46,7 +46,7 @@ class UserController extends Controller
         $data = $request->only(['name', 'phone']);
 
         if ($request->hasFile('profile_image')) {
-            
+
             if ($user->profile_image) {
                 Storage::delete('public/profiles/' . $user->profile_image);
             }
@@ -62,6 +62,10 @@ class UserController extends Controller
             ->with('success', 'Profile updated successfully');
     }
 
+    public function showChangePasswordForm(){
+        return view('user.change-password');
+    }
+
     public function changePassword(Request $request){
         $validator = Validator::make($request->all(), [
             'current_password' => 'required|string',
@@ -69,24 +73,23 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator);
         }
 
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'message' => 'Current password is incorrect'
-            ], 422);
+            return redirect()->back()
+                ->withErrors(['current_password' => 'Current password is incorrect']);
         }
 
         $this->userRepository->update($user->id, [
             'password' => Hash::make($request->password)
         ]);
 
-        return response()->json([
-            'message' => 'Password changed successfully'
-        ]);
+        return redirect()->route('profile')
+            ->with('success', 'Password changed successfully');
     }
 
 }
