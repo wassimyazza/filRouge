@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\ReservationRepository;
 use App\Repositories\PropertyRepository;
 use App\Repositories\TransactionRepository;
+use App\Repositories\PropertyImageRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -15,11 +16,13 @@ class ReservationController extends Controller{
     protected $reservationRepository;
     protected $propertyRepository;
     protected $transactionRepository;
+    protected $propertyImageRepository;
 
-    public function __construct(ReservationRepository $reservationRepository,PropertyRepository $propertyRepository,TransactionRepository $transactionRepository) {
+    public function __construct(ReservationRepository $reservationRepository,PropertyRepository $propertyRepository,TransactionRepository $transactionRepository,PropertyImageRepository $propertyImageRepository) {
         $this->reservationRepository = $reservationRepository;
         $this->propertyRepository = $propertyRepository;
         $this->transactionRepository = $transactionRepository;
+        $this->propertyImageRepository = $propertyImageRepository;
     }
 
     public function index(){
@@ -28,20 +31,20 @@ class ReservationController extends Controller{
         if ($user->isTraveler()) {
             $reservations = $this->reservationRepository->getReservationsByTraveler($user->id);
         } elseif ($user->isHost()) {
-            $reservations = $this->reservationRepository->getReservationsByHost($user->id);
+            return redirect()->route('host.reservations');
         } elseif ($user->isAdmin()) {
             $reservations = $this->reservationRepository->all();
         } else {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         foreach ($reservations as $reservation) {
             $reservation->property = $reservation->property;
-            $reservation->traveler = $reservation->traveler;
-            $reservation->transaction = $reservation->transaction;
+            $reservation->property->main_image = $this->propertyImageRepository->getMainImage($reservation->property->id);
         }
 
-        return response()->json(['reservations' => $reservations]);
+        return view('reservations.index', compact('reservations'));
     }
 
     public function show($id){

@@ -33,11 +33,10 @@ class Reservations extends Model
     }
 
     public function transaction(){
-        return $this->hasOne(Transaction::class);
+        return $this->hasOne(Transaction::class, 'reservation_id');
     }
 
     public function review(){
-        return $this->hasOne(Review::class);
+        return $this->hasOne(Review::class, 'reservation_id');
     }
-
 }

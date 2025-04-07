@@ -5,9 +5,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\HomeController;
-use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Web\PropertyController;
+use App\Http\Controllers\Web\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Reservations
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+    Route::get('/reservations/{id}', [ReservationController::class, 'show'])->name('reservations.show');
     
     // Messages
     Route::get('/messages', [MessageController::class, 'getConversationList'])->name('messages.index');
