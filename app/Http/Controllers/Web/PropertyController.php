@@ -15,10 +15,12 @@ class PropertyController extends Controller
 {
     protected $propertyRepository;
     protected $propertyImageRepository;
+    protected $reviewRepository;
 
-    public function __construct(PropertyRepository $propertyRepository,PropertyImageRepository $propertyImageRepository) {
+    public function __construct(PropertyRepository $propertyRepository,PropertyImageRepository $propertyImageRepository,ReviewRepository $reviewRepository) {
         $this->propertyRepository = $propertyRepository;
         $this->propertyImageRepository = $propertyImageRepository;
+        $this->reviewRepository = $reviewRepository;
     }
 
     public function index(Request $request){
@@ -42,12 +44,19 @@ class PropertyController extends Controller
         $property = $this->propertyRepository->find($id);
         
         if (!$property) {
-            return response()->json(['message' => 'Property not found'], 404);
+            return redirect()->route('properties.index')
+                ->with('error', 'Property not found');
         }
 
         $property->images = $this->propertyImageRepository->getImagesByProperty($property->id);
+        $reviews = $this->reviewRepository->getReviewsByProperty($property->id);
+        
+        foreach ($reviews as $review) {
+            $review->traveler_name = $review->traveler->name;
+            $review->traveler_image = $review->traveler->profile_image;
+        }
 
-        return response()->json(['property' => $property]);
+        return view('properties.show', compact('property', 'reviews'));
     }
 
     public function store(Request $request){

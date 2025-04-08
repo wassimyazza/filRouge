@@ -60,6 +60,11 @@ Route::middleware(['auth'])->group(function () {
     
     // Transactions
     Route::get('/transactions', [TransactionController::class, 'getTransactions'])->name('transactions.index');
+
+    Route::middleware(['role:traveler'])->group(function () {
+        // Reservations
+        Route::get('/properties/{id}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
+    });
     
 
 });
