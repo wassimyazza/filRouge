@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -124,7 +124,9 @@ class MessageController extends Controller
             return strtotime($b['last_message']['created_at']) - strtotime($a['last_message']['created_at']);
         });
         
-        return response()->json(['conversations' => $conversations]);
+        $unreadTotal = $this->messageRepository->getUnreadMessages($user->id)->count();
+        
+        return view('messages.index', compact('conversations', 'unreadTotal'));
     }
 
     public function getUnreadCount(){

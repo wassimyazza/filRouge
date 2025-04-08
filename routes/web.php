@@ -1,11 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\PropertyController;
 use App\Http\Controllers\Web\ReservationController;
 
