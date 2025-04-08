@@ -25,7 +25,8 @@ class MessageController extends Controller
         $otherUser = $this->userRepository->find($userId);
         
         if (!$otherUser) {
-            return response()->json(['message' => 'User not found'], 404);
+            return redirect()->route('messages.index')
+                ->with('error', 'User not found');
         }
 
         $messages = $this->messageRepository->getConversation($user->id, $userId);
@@ -36,9 +37,9 @@ class MessageController extends Controller
             }
         }
 
-        return response()->json([
+        return view('messages.conversation', [
             'messages' => $messages,
-            'other_user' => [
+            'otherUser' => [
                 'id' => $otherUser->id,
                 'name' => $otherUser->name,
                 'profile_image' => $otherUser->profile_image
