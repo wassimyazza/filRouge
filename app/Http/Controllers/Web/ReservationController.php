@@ -217,4 +217,29 @@ class ReservationController extends Controller{
             'message' => 'Reservation cancelled successfully'
         ]);
     }
+
+    public function create($propertyId){
+        $user = Auth::user();
+        
+        if (!$user->isTraveler()) {
+            return redirect()->route('properties.show', $propertyId)
+                ->with('error', 'Only travelers can make reservations');
+        }
+
+        $property = $this->propertyRepository->find($propertyId);
+        
+        if (!$property) {
+            return redirect()->route('properties.index')
+                ->with('error', 'Property not found');
+        }
+
+        if (!$property->is_available || !$property->is_approved) {
+            return redirect()->route('properties.show', $propertyId)
+                ->with('error', 'Property is not available for booking');
+        }
+
+        $property->main_image = $this->propertyImageRepository->getMainImage($property->id);
+
+        return view('reservations.create', compact('property'));
+    }
 }

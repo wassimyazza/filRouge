@@ -66,6 +66,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:traveler'])->group(function () {
         // Reservations
         Route::get('/properties/{id}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
+        Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+        Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
     });
     
 

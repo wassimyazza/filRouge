@@ -52,7 +52,6 @@
     }
     
     .trip-image {
-        height: 12rem;
         position: relative;
     }
     
