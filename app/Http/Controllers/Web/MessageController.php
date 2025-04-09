@@ -48,33 +48,33 @@ class MessageController extends Controller
     }
 
     public function sendMessage(Request $request){
-        
         $validator = Validator::make($request->all(), [
             'receiver_id' => 'required|exists:users,id',
             'content' => 'required|string|max:1000',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $user = Auth::user();
         
         if ($user->id === (int)$request->receiver_id) {
-            return response()->json(['message' => 'Cannot send message to yourself'], 400);
+            return redirect()->back()
+                ->with('error', 'Cannot send message to yourself');
         }
 
-        $message = $this->messageRepository->create([
+        $this->messageRepository->create([
             'sender_id' => $user->id,
             'receiver_id' => $request->receiver_id,
             'content' => $request->content,
             'is_read' => false,
         ]);
 
-        return response()->json([
-            'message' => 'Message sent successfully',
-            'data' => $message
-        ], 201);
+        return redirect()->route('messages.conversation', $request->receiver_id)
+            ->with('success', 'Message sent successfully');
     }
     
     public function getConversationList(){
