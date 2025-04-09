@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -47,10 +47,18 @@ class TransactionController extends Controller
                 }
             }
         } else {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
-        return response()->json(['transactions' => $transactions]);
+        // Add related data
+        foreach ($transactions as $transaction) {
+            if ($transaction->reservation) {
+                $transaction->reservation->property = $transaction->reservation->property;
+            }
+        }
+
+        return view('transactions.index', compact('transactions'));
     }
 
     public function createPaymentIntent(Request $request){
