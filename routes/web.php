@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\UserController;
@@ -68,6 +69,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/properties/{id}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
         Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
         Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+
+        // Payments
+        Route::get('/payment/checkout/{reservationId}', [TransactionController::class, 'showCheckoutPage'])->name('payment.checkout');
+        Route::post('/payment/intent', [TransactionController::class, 'createPaymentIntent'])->name('payment.intent');
+        Route::post('/payment/confirm', [TransactionController::class, 'confirmPayment'])->name('payment.confirm');
+
+        // Reviews
+        Route::get('/reservations/{id}/review', [ReviewController::class, 'create'])->name('reviews.create');
+        Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+        Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+        Route::post('/create-checkout-session', [TransactionController::class, 'createCheckoutSession'])->name('transactions.createCheckoutSession');
+
     });
     
 

@@ -67,42 +67,35 @@ class TransactionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['success' => false, 'error' => $validator->errors()->first()], 422);
         }
 
         $user = Auth::user();
         $reservation = $this->reservationRepository->find($request->reservation_id);
-        
-        if (!$reservation) {
-            return response()->json(['message' => 'Reservation not found'], 404);
-        }
 
-        if ($reservation->traveler_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        if ($reservation->status !== 'pending') {
-            return response()->json(['message' => 'This reservation cannot be paid for'], 400);
+        if (!$reservation || $reservation->traveler_id !== $user->id || $reservation->status !== 'pending') {
+            return response()->json(['success' => false, 'error' => 'Invalid reservation or access denied.'], 403);
         }
 
         $existingTransaction = $this->transactionRepository->getTransactionsByReservation($reservation->id);
         if ($existingTransaction) {
-            return response()->json(['message' => 'Payment already processed for this reservation'], 400);
+            return response()->json(['success' => false, 'error' => 'Payment already processed.'], 400);
         }
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         try {
             $paymentIntent = PaymentIntent::create([
-                'amount' => $reservation->total_price * 100,
-                'currency' => 'mad',
+                'amount' => $reservation->total_price * 100, // cents
+                'currency' => 'usd',
+                'payment_method_types' => ['card'],
                 'metadata' => [
                     'reservation_id' => $reservation->id,
-                    'property_id' => $reservation->property_id,
                     'traveler_id' => $user->id,
                 ],
             ]);
 
+            // Store transaction
             $transaction = $this->transactionRepository->create([
                 'reservation_id' => $reservation->id,
                 'amount' => $reservation->total_price,
@@ -111,23 +104,29 @@ class TransactionController extends Controller
                 'status' => 'pending',
             ]);
 
+            // Simulate successful payment (test mode shortcut)
+            $this->transactionRepository->update($transaction->id, ['status' => 'completed']);
+            $this->reservationRepository->update($reservation->id, ['status' => 'confirmed']);
+
             return response()->json([
-                'clientSecret' => $paymentIntent->client_secret,
-                'transaction' => $transaction
+                'success' => true,
+                'message' => 'Fake payment successful (Stripe test mode).',
+                'reservation_id' => $reservation->id
             ]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error creating payment: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
 
-    public function confirmPayment(Request $request){
+    public function confirmPayment(Request $request) {
         $validator = Validator::make($request->all(), [
             'payment_intent_id' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator);
         }
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -135,34 +134,46 @@ class TransactionController extends Controller
         try {
             $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
             
-            if ($paymentIntent->status !== 'succeeded') {
-                return response()->json(['message' => 'Payment not successful'], 400);
-            }
-
-            $transaction = $this->transactionRepository->getTransactionsByReservation(
-                $paymentIntent->metadata->reservation_id
-            );
-
+            $transaction = $this->transactionRepository->findByPaymentId($request->payment_intent_id);
+            
             if (!$transaction) {
-                return response()->json(['message' => 'Transaction not found'], 404);
+                return redirect()->route('reservations.index')
+                    ->with('error', 'Transaction not found');
             }
+            
+            $reservation_id = $transaction->reservation_id;
 
             $this->transactionRepository->update($transaction->id, [
                 'status' => 'completed'
             ]);
 
-            $this->reservationRepository->update($paymentIntent->metadata->reservation_id, [
+            $this->reservationRepository->update($reservation_id, [
                 'status' => 'confirmed'
             ]);
 
-            return response()->json([
-                'message' => 'Payment confirmed successfully',
-                'transaction' => $this->transactionRepository->find($transaction->id)
-            ]);
+            return redirect()->route('reservations.show', $reservation_id)
+                ->with('success', 'Payment confirmed successfully! Your reservation is now confirmed.');
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error confirming payment: ' . $e->getMessage()], 500);
+            return redirect()->route('reservations.index')
+                ->with('error', 'Error confirming payment: ' . $e->getMessage());
         }
     }
 
+    public function showCheckoutPage($reservationId){
+        $user = Auth::user();
+        $reservation = $this->reservationRepository->find($reservationId);
+
+        if (!$reservation || $reservation->traveler_id !== $user->id || $reservation->status !== 'pending') {
+            return redirect()->route('reservations.index')->with('error', 'Unauthorized or invalid reservation');
+        }
+
+        $existingTransaction = $this->transactionRepository->getTransactionsByReservation($reservation->id);
+        if ($existingTransaction) {
+            return redirect()->route('reservations.show', $reservation->id)
+                ->with('error', 'Payment already completed for this reservation');
+        }
+
+        return view('payments.checkout', compact('reservation'));
+    }
 
 }

@@ -78,7 +78,8 @@ class ReservationController extends Controller{
         $user = Auth::user();
         
         if (!$user->isTraveler()) {
-            return response()->json(['message' => 'Only travelers can make reservations'], 403);
+            return redirect()->route('properties.index')
+                ->with('error', 'Only travelers can make reservations');
         }
 
         $validator = Validator::make($request->all(), [
@@ -89,21 +90,27 @@ class ReservationController extends Controller{
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $property = $this->propertyRepository->find($request->property_id);
         
         if (!$property) {
-            return response()->json(['message' => 'Property not found'], 404);
+            return redirect()->route('properties.index')
+                ->with('error', 'Property not found');
         }
 
         if (!$property->is_available || !$property->is_approved) {
-            return response()->json(['message' => 'Property is not available for booking'], 400);
+            return redirect()->route('properties.show', $property->id)
+                ->with('error', 'Property is not available for booking');
         }
 
         if ($property->capacity < $request->guests_count) {
-            return response()->json(['message' => 'Property capacity exceeded'], 400);
+            return redirect()->back()
+                ->withErrors(['guests_count' => 'Property capacity exceeded'])
+                ->withInput();
         }
 
         $isAvailable = $this->reservationRepository->checkAvailability(
@@ -113,7 +120,9 @@ class ReservationController extends Controller{
         );
 
         if (!$isAvailable) {
-            return response()->json(['message' => 'Property is not available for the selected dates'], 400);
+            return redirect()->back()
+                ->withErrors(['check_in_date' => 'Property is not available for the selected dates'])
+                ->withInput();
         }
 
         $checkIn = Carbon::parse($request->check_in_date);
@@ -131,11 +140,8 @@ class ReservationController extends Controller{
             'status' => 'pending', // Initial status
         ]);
 
-        return response()->json([
-            'message' => 'Reservation created successfully',
-            'reservation' => $reservation,
-            'payment_required' => true
-        ], 201);
+        return redirect()->route('payment.checkout', $reservation->id)
+        ->with('success', 'Reservation created successfully. Please complete payment to confirm your booking.');
     }
 
     public function update(Request $request, $id){

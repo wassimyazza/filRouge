@@ -17,4 +17,7 @@ class TransactionRepository extends BaseRepository
     public function getTransactionsByReservation($reservationId){
         return $this->model->where('reservation_id', $reservationId)->first();
     }
+    public function findByPaymentId(string $paymentId){
+        return Transaction::where('payment_id', $paymentId)->first();
+    }
 }
