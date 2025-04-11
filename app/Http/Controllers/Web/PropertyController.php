@@ -59,11 +59,25 @@ class PropertyController extends Controller
         return view('properties.show', compact('property', 'reviews'));
     }
 
+    public function create(){
+        $user = Auth::user();
+        
+        if (!$user->isHost()) {
+            return redirect()->route('properties.index')
+                ->with('error', 'Only hosts can create properties');
+        }
+
+        $property_types = ['apartment', 'house', 'villa', 'cabin', 'condo', 'studio'];
+        
+        return view('properties.create', compact('property_types'));
+    }
+
     public function store(Request $request){
         $user = Auth::user();
         
         if (!$user->isHost()) {
-            return response()->json(['message' => 'Only hosts can create properties'], 403);
+            return redirect()->route('properties.index')
+                ->with('error', 'Only hosts can create properties');
         }
 
         $validator = Validator::make($request->all(), [
@@ -77,11 +91,13 @@ class PropertyController extends Controller
             'bedrooms' => 'required|integer|min:0',
             'bathrooms' => 'required|integer|min:0',
             'images' => 'nullable|array',
-            'images.*' => 'nullable|string',
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $property = $this->propertyRepository->create([
@@ -112,10 +128,8 @@ class PropertyController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Property created successfully and pending approval',
-            'property' => $property
-        ], 201);
+        return redirect()->route('host.properties')
+            ->with('success', 'Property created successfully and pending approval');
     }
 
     public function update(Request $request, $id){
@@ -123,11 +137,13 @@ class PropertyController extends Controller
         $property = $this->propertyRepository->find($id);
         
         if (!$property) {
-            return response()->json(['message' => 'Property not found'], 404);
+            return redirect()->route('host.properties')
+                ->with('error', 'Property not found');
         }
 
         if ($property->host_id !== $user->id && !$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('host.properties')
+                ->with('error', 'Unauthorized access');
         }
 
         $validator = Validator::make($request->all(), [
@@ -146,7 +162,9 @@ class PropertyController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $this->propertyRepository->update($id, $request->only([
@@ -167,10 +185,8 @@ class PropertyController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Property updated successfully',
-            'property' => $this->propertyRepository->find($id)
-        ]);
+        return redirect()->route('host.properties')
+            ->with('success', 'Property updated successfully');
     }
 
     public function destroy($id){
@@ -178,11 +194,13 @@ class PropertyController extends Controller
         $property = $this->propertyRepository->find($id);
         
         if (!$property) {
-            return response()->json(['message' => 'Property not found'], 404);
+            return redirect()->route('host.properties')
+                ->with('error', 'Property not found');
         }
 
         if ($property->host_id !== $user->id && !$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('host.properties')
+                ->with('error', 'Unauthorized access');
         }
 
         $images = $this->propertyImageRepository->getImagesByProperty($id);
@@ -193,7 +211,8 @@ class PropertyController extends Controller
 
         $this->propertyRepository->delete($id);
 
-        return response()->json(['message' => 'Property deleted successfully']);
+        return redirect()->route('host.properties')
+            ->with('success', 'Property deleted successfully');
     }
 
     public function myProperties(){
@@ -211,5 +230,25 @@ class PropertyController extends Controller
         }
 
         return view('host.properties', compact('properties'));
+    }
+
+    public function edit($id){
+        $user = Auth::user();
+        $property = $this->propertyRepository->find($id);
+        
+        if (!$property) {
+            return redirect()->route('host.properties')
+                ->with('error', 'Property not found');
+        }
+
+        if ($property->host_id !== $user->id && !$user->isAdmin()) {
+            return redirect()->route('host.properties')
+                ->with('error', 'Unauthorized access');
+        }
+
+        $property->images = $this->propertyImageRepository->getImagesByProperty($property->id);
+        $property_types = ['apartment', 'house', 'villa', 'cabin', 'condo', 'studio'];
+
+        return view('properties.edit', compact('property', 'property_types'));
     }
 }

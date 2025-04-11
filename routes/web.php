@@ -24,9 +24,6 @@ use App\Http\Controllers\Web\TransactionController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Public property routes
-Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
-Route::get('/properties/{id}', [PropertyController::class, 'show'])->name('properties.show');
 
 // Guest routes
 Route::middleware(['guest'])->group(function () {
@@ -91,14 +88,22 @@ Route::middleware(['auth'])->group(function () {
         // Properties
         Route::get('/host/properties', [PropertyController::class, 'myProperties'])->name('host.properties');
         Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
-
-
+        Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
+        Route::get('/properties/{id}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
+        Route::put('/properties/{id}', [PropertyController::class, 'update'])->name('properties.update');
+        Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])->name('properties.destroy');
+        
         // Reservations
         Route::get('/host/reservations', [ReservationController::class, 'hostReservations'])->name('host.reservations');
-
+        Route::put('/reservations/{id}', [ReservationController::class, 'update'])->name('reservations.update');
+        
         // Withdrawals
         Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
+        Route::get('/withdrawals/create', [WithdrawalController::class, 'create'])->name('withdrawals.create');
+        Route::post('/withdrawals', [WithdrawalController::class, 'store'])->name('withdrawals.store');
+    });  
 
-    });    
-
+    // Public property routes
+    Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+    Route::get('/properties/{id}', [PropertyController::class, 'show'])->name('properties.show');
 });

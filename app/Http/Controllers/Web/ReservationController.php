@@ -47,6 +47,24 @@ class ReservationController extends Controller{
         return view('reservations.index', compact('reservations'));
     }
 
+    public function hostReservations(){
+        $user = Auth::user();
+        
+        if (!$user->isHost()) {
+            return redirect()->route('home')
+                ->with('error', 'Only hosts can access this page');
+        }
+        
+        $reservations = $this->reservationRepository->getReservationsByHost($user->id);
+        
+        foreach ($reservations as $reservation) {
+            $reservation->property = $reservation->property;
+            $reservation->traveler = $reservation->traveler;
+        }
+        
+        return view('reservations.host-index', compact('reservations'));
+    }
+
     public function show($id){
         $user = Auth::user();
         $reservation = $this->reservationRepository->find($id);

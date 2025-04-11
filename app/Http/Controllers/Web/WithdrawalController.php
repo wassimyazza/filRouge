@@ -26,15 +26,15 @@ class WithdrawalController extends Controller{
     public function index(){
         $user = Auth::user();
         
-        if ($user->isAdmin()) {
-            $withdrawals = $this->withdrawalRepository->all();
-        } elseif ($user->isHost()) {
-            $withdrawals = $this->withdrawalRepository->getWithdrawalsByHost($user->id);
-        } else {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$user->isHost()) {
+            return redirect()->route('home')
+                ->with('error', 'Only hosts can access withdrawals');
         }
 
-        return response()->json(['withdrawals' => $withdrawals]);
+        $withdrawals = $this->withdrawalRepository->getWithdrawalsByHost($user->id);
+        $availableBalance = $this->calculateAvailableBalance($user->id);
+        
+        return view('withdrawals.index', compact('withdrawals', 'availableBalance'));
     }
 
     public function store(Request $request){
