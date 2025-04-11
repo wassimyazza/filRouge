@@ -196,12 +196,12 @@ class PropertyController extends Controller
         return response()->json(['message' => 'Property deleted successfully']);
     }
 
-    public function myProperties()
-    {
+    public function myProperties(){
         $user = Auth::user();
         
         if (!$user->isHost()) {
-            return response()->json(['message' => 'Only hosts can access their properties'], 403);
+            return redirect()->route('properties.index')
+                ->with('error', 'Only hosts can access their properties');
         }
 
         $properties = $this->propertyRepository->getPropertiesByHost($user->id);
@@ -210,6 +210,6 @@ class PropertyController extends Controller
             $property->main_image = $this->propertyImageRepository->getMainImage($property->id);
         }
 
-        return response()->json(['properties' => $properties]);
+        return view('host.properties', compact('properties'));
     }
 }

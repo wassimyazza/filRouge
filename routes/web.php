@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\PropertyController;
+use App\Http\Controllers\Web\WithdrawalController;
 use App\Http\Controllers\Web\ReservationController;
 use App\Http\Controllers\Web\TransactionController;
 
@@ -82,7 +83,22 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/create-checkout-session', [TransactionController::class, 'createCheckoutSession'])->name('transactions.createCheckoutSession');
 
+        
     });
-    
+
+    // Host routes
+    Route::middleware(['role:host'])->group(function () {
+        // Properties
+        Route::get('/host/properties', [PropertyController::class, 'myProperties'])->name('host.properties');
+        Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
+
+
+        // Reservations
+        Route::get('/host/reservations', [ReservationController::class, 'hostReservations'])->name('host.reservations');
+
+        // Withdrawals
+        Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
+
+    });    
 
 });

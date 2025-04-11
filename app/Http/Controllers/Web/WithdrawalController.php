@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 use App\Repositories\WithdrawalRepository;
 use App\Repositories\ReservationRepository;
 use App\Repositories\TransactionRepository;
