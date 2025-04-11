@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\UserRepository;
@@ -34,7 +34,8 @@ class AdminController extends Controller
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         $stats = [
@@ -50,7 +51,7 @@ class AdminController extends Controller
             'total_revenue' => $this->transactionRepository->all()->where('status', 'completed')->sum('amount'),
         ];
 
-        return response()->json(['stats' => $stats]);
+        return view('admin.dashboard', compact('stats'));
     }
 
     public function getUsers(Request $request){

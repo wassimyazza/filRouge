@@ -5,6 +5,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\PropertyController;
 use App\Http\Controllers\Web\WithdrawalController;
@@ -101,7 +102,26 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
         Route::get('/withdrawals/create', [WithdrawalController::class, 'create'])->name('withdrawals.create');
         Route::post('/withdrawals', [WithdrawalController::class, 'store'])->name('withdrawals.store');
-    });  
+    });
+    
+    
+    // Admin routes
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Users
+        Route::get('/users', [AdminController::class, 'getUsers'])->name('users');
+
+        
+        // Properties
+        Route::get('/properties/pending', [AdminController::class, 'getPendingProperties'])->name('properties.pending');
+        
+        // Reviews
+        Route::get('/reviews/pending', [ReviewController::class, 'getPendingReviews'])->name('reviews.pending');
+        
+        // Withdrawals
+        Route::get('/withdrawals', [WithdrawalController::class, 'adminIndex'])->name('withdrawals');
+    });
 
     // Public property routes
     Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
