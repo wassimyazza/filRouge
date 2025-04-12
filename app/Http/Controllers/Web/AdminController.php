@@ -102,11 +102,11 @@ class AdminController extends Controller
     }
 
     public function getPendingProperties(){
-
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         $properties = $this->propertyRepository->all()->where('is_approved', false);
@@ -115,30 +115,29 @@ class AdminController extends Controller
             $property->host_name = $property->host->name;
         }
 
-        return response()->json(['properties' => $properties]);
+        return view('admin.properties', compact('properties'));
     }
 
     public function approveProperty($id){
-        
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         $property = $this->propertyRepository->find($id);
         
         if (!$property) {
-            return response()->json(['message' => 'Property not found'], 404);
+            return redirect()->route('admin.properties.pending')
+                ->with('error', 'Property not found');
         }
 
         $this->propertyRepository->update($id, [
             'is_approved' => true
         ]);
 
-        return response()->json([
-            'message' => 'Property approved successfully',
-            'property' => $this->propertyRepository->find($id)
-        ]);
+        return redirect()->route('admin.properties.pending')
+            ->with('success', 'Property approved successfully');
     }
 }

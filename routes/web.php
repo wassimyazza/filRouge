@@ -116,6 +116,7 @@ Route::middleware(['auth'])->group(function () {
         
         // Properties
         Route::get('/properties/pending', [AdminController::class, 'getPendingProperties'])->name('properties.pending');
+        Route::put('/properties/{id}/approve', [AdminController::class, 'approveProperty'])->name('properties.approve');
         
         // Reviews
         Route::get('/reviews/pending', [ReviewController::class, 'getPendingReviews'])->name('reviews.pending');
