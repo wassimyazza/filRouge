@@ -111,6 +111,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Users
         Route::get('/users', [AdminController::class, 'getUsers'])->name('users');
+        Route::put('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
 
         
         // Properties

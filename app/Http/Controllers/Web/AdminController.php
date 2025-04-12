@@ -55,11 +55,11 @@ class AdminController extends Controller
     }
 
     public function getUsers(Request $request){
-
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         $role = $request->query('role');
@@ -70,34 +70,35 @@ class AdminController extends Controller
             $users = $this->userRepository->all();
         }
 
-        return response()->json(['users' => $users]);
+        return view('admin.users', compact('users', 'role'));
     }
 
     public function toggleUserStatus($id){
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         $targetUser = $this->userRepository->find($id);
         
         if (!$targetUser) {
-            return response()->json(['message' => 'User not found'], 404);
+            return redirect()->route('admin.users')
+                ->with('error', 'User not found');
         }
 
         if ($targetUser->isAdmin()) {
-            return response()->json(['message' => 'Cannot deactivate admin users'], 400);
+            return redirect()->route('admin.users')
+                ->with('error', 'Cannot deactivate admin users');
         }
 
         $this->userRepository->update($id, [
             'is_active' => !$targetUser->is_active
         ]);
 
-        return response()->json([
-            'message' => 'User status updated successfully',
-            'user' => $this->userRepository->find($id)
-        ]);
+        return redirect()->route('admin.users')
+            ->with('success', 'User status updated successfully');
     }
 
     public function getPendingProperties(){
