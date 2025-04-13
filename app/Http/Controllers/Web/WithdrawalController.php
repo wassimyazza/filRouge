@@ -37,47 +37,75 @@ class WithdrawalController extends Controller{
         return view('withdrawals.index', compact('withdrawals', 'availableBalance'));
     }
 
+    public function adminIndex(){
+        $user = Auth::user();
+        
+        if (!$user->isAdmin()) {
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
+        }
+
+        $withdrawals = $this->withdrawalRepository->all();
+        
+        foreach ($withdrawals as $withdrawal) {
+            $withdrawal->host_name = $withdrawal->host->name;
+        }
+        
+        return view('admin.withdrawals', compact('withdrawals'));
+    }
+
+    public function create(){
+        $user = Auth::user();
+        
+        if (!$user->isHost()) {
+            return redirect()->route('home')
+                ->with('error', 'Only hosts can request withdrawals');
+        }
+        
+        $availableBalance = $this->calculateAvailableBalance($user->id);
+        
+        return view('withdrawals.create', compact('availableBalance'));
+    }
+
     public function store(Request $request){
         $user = Auth::user();
         
         if (!$user->isHost()) {
-            return response()->json(['message' => 'Only hosts can request withdrawals'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Only hosts can request withdrawals');
         }
 
         $validator = Validator::make($request->all(), [
-            'amount' => 'required|numeric|min:100',
             'amount' => 'required|numeric|min:100',
             'bank_info' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $availableBalance = $this->calculateAvailableBalance($user->id);
 
         if ($request->amount > $availableBalance) {
-            return response()->json([
-                'message' => 'Insufficient balance',
-                'available_balance' => $availableBalance
-            ], 400);
+            return redirect()->back()
+                ->withErrors(['amount' => 'Insufficient balance'])
+                ->withInput();
         }
 
-        $withdrawal = $this->withdrawalRepository->create([
+        $this->withdrawalRepository->create([
             'host_id' => $user->id,
             'amount' => $request->amount,
             'status' => 'pending',
             'bank_info' => $request->bank_info,
         ]);
 
-        return response()->json([
-            'message' => 'Withdrawal request submitted successfully',
-            'withdrawal' => $withdrawal
-        ], 201);
+        return redirect()->route('withdrawals.index')
+            ->with('success', 'Withdrawal request submitted successfully');
     }
 
     private function calculateAvailableBalance($hostId){
-
         $reservations = $this->reservationRepository->getReservationsByHost($hostId)->where('status', 'completed');
         
         $totalEarnings = 0;
@@ -89,7 +117,9 @@ class WithdrawalController extends Controller{
             }
         }
         
-        $approvedWithdrawals = $this->withdrawalRepository->getWithdrawalsByHost($hostId)->where('status', 'approved')->sum('amount');
+        $approvedWithdrawals = $this->withdrawalRepository->getWithdrawalsByHost($hostId)
+            ->where('status', 'approved')
+            ->sum('amount');
         
         return $totalEarnings - $approvedWithdrawals;
     }
@@ -99,53 +129,58 @@ class WithdrawalController extends Controller{
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Only admins can approve withdrawals'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Only admins can approve withdrawals');
         }
 
         $withdrawal = $this->withdrawalRepository->find($id);
         
         if (!$withdrawal) {
-            return response()->json(['message' => 'Withdrawal not found'], 404);
+            return redirect()->route('admin.withdrawals')
+                ->with('error', 'Withdrawal not found');
         }
 
         if ($withdrawal->status !== 'pending') {
-            return response()->json(['message' => 'Only pending withdrawals can be approved'], 400);
+            return redirect()->route('admin.withdrawals')
+                ->with('error', 'Only pending withdrawals can be approved');
         }
 
         $this->withdrawalRepository->update($id, [
             'status' => 'approved'
         ]);
 
-        return response()->json([
-            'message' => 'Withdrawal approved successfully',
-            'withdrawal' => $this->withdrawalRepository->find($id)
-        ]);
+        return redirect()->route('admin.withdrawals')
+            ->with('success', 'Withdrawal approved successfully');
     }
 
-    public function reject($id){
+    public function reject($id)
+    {
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Only admins can reject withdrawals'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Only admins can reject withdrawals');
         }
 
         $withdrawal = $this->withdrawalRepository->find($id);
         
         if (!$withdrawal) {
-            return response()->json(['message' => 'Withdrawal not found'], 404);
+            return redirect()->route('admin.withdrawals')
+                ->with('error', 'Withdrawal not found');
         }
 
         if ($withdrawal->status !== 'pending') {
-            return response()->json(['message' => 'Only pending withdrawals can be rejected'], 400);
+            return redirect()->route('admin.withdrawals')
+                ->with('error', 'Only pending withdrawals can be rejected');
         }
 
         $this->withdrawalRepository->update($id, [
             'status' => 'rejected'
         ]);
 
-        return response()->json([
-            'message' => 'Withdrawal rejected successfully',
-            'withdrawal' => $this->withdrawalRepository->find($id)
-        ]);
+        return redirect()->route('admin.withdrawals')
+            ->with('success', 'Withdrawal rejected successfully');
     }
+
+    
 }
