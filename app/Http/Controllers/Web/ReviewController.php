@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\ReviewRepository;
@@ -129,7 +129,8 @@ class ReviewController extends Controller
         $user = Auth::user();
         
         if (!$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->route('home')
+                ->with('error', 'Unauthorized access');
         }
 
         $reviews = $this->reviewRepository->getPendingReviews();
@@ -139,7 +140,7 @@ class ReviewController extends Controller
             $review->property_title = $review->property->title;
         }
 
-        return response()->json(['reviews' => $reviews]);
+        return view('admin.reviews', compact('reviews'));
     }
 
 }
