@@ -45,40 +45,51 @@
         </div>
     </div>
     
-    <!-- Property Images Gallery -->
-    <div class="mb-8">
-        @if(count($property->images) > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2 h-80 overflow-hidden rounded-t-lg">
-                    <img src="{{ asset('storage/properties/' . $property->images[0]->image_path) }}" alt="{{ $property->title }}" class="w-full h-full object-cover">
-                </div>
-                
-                @if(count($property->images) > 1)
-                    <div class="h-48 overflow-hidden">
-                        <img src="{{ asset('storage/properties/' . $property->images[1]->image_path) }}" alt="Property image" class="w-full h-full object-cover">
-                    </div>
-                @else
-                    <div class="h-48 bg-gray-200 flex items-center justify-center">
-                        <i class="fas fa-image text-gray-400 text-5xl"></i>
-                    </div>
-                @endif
-                
-                @if(count($property->images) > 2)
-                    <div class="h-48 overflow-hidden">
-                        <img src="{{ asset('storage/properties/' . $property->images[2]->image_path) }}" alt="Property image" class="w-full h-full object-cover">
-                    </div>
-                @else
-                    <div class="h-48 bg-gray-200 flex items-center justify-center">
-                        <i class="fas fa-image text-gray-400 text-5xl"></i>
-                    </div>
-                @endif
+    <!-- Redesigned Property Images Gallery -->
+<!-- Enhanced Property Images Gallery -->
+<div class="mb-8">
+    @if($property->images->count() > 0)
+        @if($property->images->count() === 1)
+            <!-- Only one image: full-width display -->
+            <div class="h-[500px] rounded-lg overflow-hidden">
+                <img src="{{ asset('storage/properties/' . $property->images[0]->image_path) }}" alt="{{ $property->title }}" class="w-full h-full object-cover rounded-lg">
             </div>
         @else
-            <div class="h-80 bg-gray-200 rounded-lg flex items-center justify-center">
-                <i class="fas fa-home text-gray-400 text-6xl"></i>
+            <!-- Multiple images: featured layout -->
+            <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 h-[500px] rounded-lg overflow-hidden">
+                <!-- Main image -->
+                <div class="col-span-2 row-span-2 h-full">
+                    <img src="{{ asset('storage/properties/' . $property->images[0]->image_path) }}" alt="Main image" class="w-full h-full object-cover rounded-l-lg">
+                </div>
+
+                <!-- Next 4 images (if available) -->
+                @foreach($property->images->slice(1, 4) as $image)
+                    <div class="h-full">
+                        <img src="{{ asset('storage/properties/' . $image->image_path) }}" alt="Additional image" class="w-full h-full object-cover">
+                    </div>
+                @endforeach
             </div>
+
+            <!-- Extra images in gallery -->
+            @if($property->images->count() > 5)
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+                    @foreach($property->images->slice(5) as $image)
+                        <div class="h-40 rounded overflow-hidden">
+                            <img src="{{ asset('storage/properties/' . $image->image_path) }}" alt="Gallery image" class="w-full h-full object-cover">
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         @endif
-    </div>
+    @else
+        <!-- No images -->
+        <div class="h-80 bg-gray-200 rounded-lg flex items-center justify-center">
+            <i class="fas fa-home text-gray-400 text-6xl"></i>
+        </div>
+    @endif
+</div>
+
+
     
     <div class="flex flex-col lg:flex-row gap-8">
         <!-- Property Details -->
