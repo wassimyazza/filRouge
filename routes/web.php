@@ -108,11 +108,10 @@ Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
+        
         // Users
         Route::get('/users', [AdminController::class, 'getUsers'])->name('users');
         Route::put('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
-
         
         // Properties
         Route::get('/properties/pending', [AdminController::class, 'getPendingProperties'])->name('properties.pending');
@@ -120,9 +119,12 @@ Route::middleware(['auth'])->group(function () {
         
         // Reviews
         Route::get('/reviews/pending', [ReviewController::class, 'getPendingReviews'])->name('reviews.pending');
+        Route::put('/reviews/{id}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
         
         // Withdrawals
         Route::get('/withdrawals', [WithdrawalController::class, 'adminIndex'])->name('withdrawals');
+        Route::put('/withdrawals/{id}/approve', [WithdrawalController::class, 'approve'])->name('withdrawals.approve');
+        Route::put('/withdrawals/{id}/reject', [WithdrawalController::class, 'reject'])->name('withdrawals.reject');
     });
 
     // Public property routes

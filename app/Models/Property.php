@@ -42,6 +42,11 @@ class Property extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function getMainImageAttribute(){
+        return $this->images()->where('is_main', true)->first()?->image_path;
+    }
+    
+
     // Get average rating
     public function getAverageRatingAttribute()
     {
