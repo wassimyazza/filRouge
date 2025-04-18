@@ -54,7 +54,7 @@
                                     <div class="flex justify-between items-end mt-4">
                                         <div>
                                             <div class="text-gray-700 text-sm">
-                                                <span>${{ number_format($property->price_per_night, 2) }} / night</span>
+                                                <span>{{ number_format($property->price_per_night, 2) }} MAD/ night</span>
                                             </div>
                                             <div class="text-gray-500 text-xs mt-1">
                                                 @if($property->is_available)

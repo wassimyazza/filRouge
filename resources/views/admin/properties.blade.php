@@ -71,7 +71,7 @@
                                                     <i class="fas fa-bath text-blue-500 mr-1"></i> {{ $property->bathrooms }} bathrooms
                                                 </div>
                                                 <div>
-                                                    <i class="fas fa-dollar-sign text-blue-500 mr-1"></i> ${{ number_format($property->price_per_night, 2) }}/night
+                                                    <i class="fas text-blue-500 mr-1">MAD</i> {{ number_format($property->price_per_night, 2) }} MAD/night
                                                 </div>
                                             </div>
                                         </div>

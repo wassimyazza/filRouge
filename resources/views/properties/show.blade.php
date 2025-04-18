@@ -229,7 +229,7 @@
             <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <span class="text-xl font-bold text-gray-900">${{ number_format($property->price_per_night, 2) }}</span>
+                        <span class="text-xl font-bold text-gray-900">{{ number_format($property->price_per_night, 2) }} MAD</span>
                         <span class="text-gray-600">/ night</span>
                     </div>
                     <div class="flex items-center">
@@ -258,20 +258,20 @@
                 
                 <div class="space-y-4 text-sm">
                     <div class="flex justify-between">
-                        <span>${{ number_format($property->price_per_night, 2) }} x 5 nights</span>
-                        <span>${{ number_format($property->price_per_night * 5, 2) }}</span>
+                        <span>{{ number_format($property->price_per_night, 2) }} MAD x 5 nights</span>
+                        <span>{{ number_format($property->price_per_night * 5, 2) }} MAD</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Cleaning fee</span>
-                        <span>${{ number_format($property->price_per_night * 0.1, 2) }}</span>
+                        <span>{{ number_format($property->price_per_night * 0.1, 2) }} MAD</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Service fee</span>
-                        <span>${{ number_format($property->price_per_night * 0.15, 2) }}</span>
+                        <span>{{ number_format($property->price_per_night * 0.15, 2) }} MAD</span>
                     </div>
                     <div class="pt-4 border-t border-gray-200 flex justify-between font-bold">
                         <span>Total</span>
-                        <span>${{ number_format($property->price_per_night * 5 + $property->price_per_night * 0.1 + $property->price_per_night * 0.15, 2) }}</span>
+                        <span>{{ number_format($property->price_per_night * 5 + $property->price_per_night * 0.1 + $property->price_per_night * 0.15, 2) }} MAD</span>
                     </div>
                 </div>
                 

@@ -26,7 +26,7 @@
                             <h2 class="font-semibold text-blue-800">Your Available Balance</h2>
                             <p class="text-sm text-blue-600">Funds available for withdrawal</p>
                         </div>
-                        <div class="text-2xl font-bold text-blue-600">${{ number_format($availableBalance, 2) }}</div>
+                        <div class="text-2xl font-bold text-blue-600">{{ number_format($availableBalance, 2) }} MAD</div>
                     </div>
                 </div>
                 
@@ -37,16 +37,16 @@
                         <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Withdrawal Amount *</label>
                         <div class="relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">$</span>
+                                <span class="text-gray-500 sm:text-sm">DH</span>
                             </div>
-                            <input type="number" name="amount" id="amount" min="100" max="{{ $availableBalance }}" step="0.01" required
-                                value="{{ old('amount', $availableBalance >= 100 ? $availableBalance : 100) }}"
-                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
+                            <input type="number" name="amount" id="amount" min="1000" max="{{ $availableBalance }}" step="0.01" required
+                                value="{{ old('amount', $availableBalance >= 1000 ? $availableBalance : 1000) }}"
+                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-md">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">USD</span>
+                                <span class="text-gray-500 sm:text-sm">MAD</span>
                             </div>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Minimum withdrawal amount is $100.00</p>
+                        <p class="mt-1 text-xs text-gray-500">Minimum withdrawal amount is 1000.00 MAD</p>
                         @error('amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

@@ -75,10 +75,10 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm font-medium text-gray-500">Total Revenue</p>
-                            <h3 class="text-2xl font-bold text-gray-900 mt-1">${{ number_format($stats['total_revenue'], 2) }}</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_revenue'], 2) }} MAD</h3>
                         </div>
                         <div class="bg-indigo-100 p-3 rounded-md">
-                            <i class="fas fa-dollar-sign text-indigo-600"></i>
+                            <i class="fas text-indigo-600">DH</i>
                         </div>
                     </div>
                     <div class="mt-4">

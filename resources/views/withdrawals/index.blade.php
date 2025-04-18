@@ -22,7 +22,7 @@
                             <h2 class="text-lg font-semibold">Available Balance</h2>
                             <p class="text-sm text-blue-100">Available for withdrawal</p>
                         </div>
-                        <div class="text-3xl font-bold">${{ number_format($availableBalance, 2) }}</div>
+                        <div class="text-3xl font-bold">{{ number_format($availableBalance, 2) }} MAD</div>
                     </div>
                     
                     <div class="mt-6">
@@ -32,7 +32,7 @@
                         </a>
                         @if($availableBalance < 100)
                             <p class="text-sm text-blue-100 mt-2">
-                                <i class="fas fa-info-circle mr-1"></i> Minimum withdrawal amount is $100.00
+                                <i class="fas fa-info-circle mr-1"></i> Minimum withdrawal amount is 1000.00 MAD
                             </p>
                         @endif
                     </div>
@@ -72,7 +72,7 @@
                                             <div class="text-xs text-gray-500">{{ date('h:i A', strtotime($withdrawal->created_at)) }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">${{ number_format($withdrawal->amount, 2) }}</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ number_format($withdrawal->amount, 2) }} MAD</div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="text-sm text-gray-900 max-w-xs truncate">{{ $withdrawal->bank_info }}</div>

@@ -92,7 +92,7 @@
                                         </div>
                                         <div>
                                             <h4 class="text-sm font-medium text-gray-700">Total:</h4>
-                                            <p class="font-medium">${{ number_format($reservation->total_price, 2) }}</p>
+                                            <p class="font-medium">{{ number_format($reservation->total_price, 2) }} MAD</p>
                                         </div>
                                     </div>
                                     

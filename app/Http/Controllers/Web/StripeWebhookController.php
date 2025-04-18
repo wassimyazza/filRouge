@@ -42,7 +42,6 @@ class StripeWebhookController extends Controller
             return response()->json(['error' => 'Webhook error'], 400);
         }
 
-        // Handle the event
         switch ($event->type) {
             case 'payment_intent.succeeded':
                 $paymentIntent = $event->data->object;
@@ -53,7 +52,6 @@ class StripeWebhookController extends Controller
                 $this->handleFailedPayment($paymentIntent);
                 break;
             default:
-                // Unexpected event type
                 Log::info('Received unknown event type: ' . $event->type);
         }
 
@@ -71,12 +69,10 @@ class StripeWebhookController extends Controller
         
         $reservation_id = $transaction->reservation_id;
 
-        // Update transaction status to completed
         $this->transactionRepository->update($transaction->id, [
             'status' => 'completed'
         ]);
 
-        // Automatically confirm the reservation without admin approval
         $this->reservationRepository->update($reservation_id, [
             'status' => 'confirmed'
         ]);
@@ -95,7 +91,6 @@ class StripeWebhookController extends Controller
         
         $reservation_id = $transaction->reservation_id;
 
-        // Update transaction status to failed
         $this->transactionRepository->update($transaction->id, [
             'status' => 'failed'
         ]);

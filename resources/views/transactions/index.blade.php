@@ -90,7 +90,7 @@
                                                 @elseif(Auth::user()->isHost()) text-green-600 
                                                 @else text-gray-900 
                                                 @endif">
-                                                ${{ number_format($transaction->amount, 2) }}
+                                               {{ number_format($transaction->amount, 2) }} MAD
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">

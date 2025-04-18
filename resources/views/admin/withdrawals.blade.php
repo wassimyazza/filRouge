@@ -66,7 +66,7 @@
                                             <div class="text-xs text-gray-500">{{ date('h:i A', strtotime($withdrawal->created_at)) }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">${{ number_format($withdrawal->amount, 2) }}</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ number_format($withdrawal->amount, 2) }} MAD</div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <button type="button" class="text-sm text-blue-600 hover:text-blue-900 view-bank-info" data-bank-info="{{ $withdrawal->bank_info }}">
