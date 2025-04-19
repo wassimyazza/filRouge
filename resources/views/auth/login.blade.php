@@ -185,9 +185,6 @@
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-2">
                         <label for="password" class="block text-gray-700 text-sm font-medium">Password</label>
-                        <a href="{{ route('password.request') }}" class="text-xs link-moroccan">
-                            Forgot password?
-                        </a>
                     </div>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -215,18 +212,7 @@
                     </button>
                 </div>
                 
-                <div class="moroccan-divider">
-                    <span class="px-2 text-sm">Or</span>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <a href="#" class="social-login-btn">
-                        <i class="fab fa-google text-red-500 mr-2"></i> Google
-                    </a>
-                    <a href="#" class="social-login-btn">
-                        <i class="fab fa-facebook-f text-blue-600 mr-2"></i> Facebook
-                    </a>
-                </div>
+
                 
                 <div class="text-center text-gray-600 text-sm">
                     Don't have an account? 

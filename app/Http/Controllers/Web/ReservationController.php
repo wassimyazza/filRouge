@@ -263,7 +263,19 @@ class ReservationController extends Controller{
         }
 
         $property->main_image = $this->propertyImageRepository->getMainImage($property->id);
+        
+        // Get booked dates for the property
+        $bookedDates = $this->reservationRepository->getBookedDatesForProperty($propertyId);
 
-        return view('reservations.create', compact('property'));
+        return view('reservations.create', compact('property', 'bookedDates'));
+    }
+    
+    public function getBookedDates($propertyId){
+        $bookedDates = $this->reservationRepository->getBookedDatesForProperty($propertyId);
+        
+        return response()->json([
+            'property_id' => $propertyId,
+            'booked_dates' => $bookedDates
+        ]);
     }
 }

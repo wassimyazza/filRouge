@@ -54,6 +54,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservations/{id}', [ReservationController::class, 'show'])->name('reservations.show');
     Route::get('/messages/{userId}', [MessageController::class, 'getConversation'])->name('messages.conversation');
+    Route::get('/properties/{property}/booked-dates', [ReservationController::class, 'getBookedDates'])->name('properties.booked-dates');
     
     // Messages
     Route::get('/messages', [MessageController::class, 'getConversationList'])->name('messages.index');
@@ -127,7 +128,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/withdrawals/{id}/reject', [WithdrawalController::class, 'reject'])->name('withdrawals.reject');
     });
 
+});
     // Public property routes
     Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
     Route::get('/properties/{id}', [PropertyController::class, 'show'])->name('properties.show');
-});

@@ -266,7 +266,7 @@
                 @if(count($reservations) > 0)
                     <div class="space-y-6">
                         @foreach($reservations as $reservation)
-                            <div class="reservation-item trip-card" 
+                            <div class="reservation-item trip-card max-h-[320px]" 
                                 data-status="{{ $reservation->status }}" 
                                 data-date="{{ $reservation->check_out_date }}">
                                 <div class="md:flex">

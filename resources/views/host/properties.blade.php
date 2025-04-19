@@ -22,7 +22,7 @@
             @if(count($properties) > 0)
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     @foreach($properties as $property)
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden max-h-[150px]">
                             <div class="flex">
                                 <div class="w-1/3 bg-blue-100">
                                     @if($property->main_image)

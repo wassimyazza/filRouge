@@ -364,6 +364,13 @@
         box-shadow: 0 4px 8px rgba(214, 40, 40, 0.3);
     }
     
+    .btn-payment:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
     .price-value {
         font-weight: 600;
         color: #1f2937;
@@ -372,6 +379,72 @@
     .price-total {
         font-weight: 700;
         color: #d62828;
+    }
+    
+    /* Payment Form Styles */
+    .payment-form {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .payment-form-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #4b5563;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .payment-card-row {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .payment-card-row .form-group {
+        flex: 1;
+    }
+    
+    #card-errors {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    
+    .spinner {
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #d62828;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+        display: none;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 </style>
 @endsection
@@ -525,13 +598,42 @@
                         @endif
                         
                         @if($reservation->status == 'pending' && !$reservation->transaction)
-                            <form method="POST" action="{{ route('payment.intent') }}">
-                                @csrf
-                                <input type="hidden" name="reservation_id" value="{{ $reservation->id }}">
-                                <button type="submit" class="btn-payment">
-                                    <i class="fas fa-credit-card mr-2"></i> Proceed to Payment
-                                </button>
-                            </form>
+                            <div class="payment-form">
+                                <h3 class="payment-form-title">Enter Payment Information</h3>
+                                <form id="payment-form" action="{{ route('payment.intent') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="reservation_id" value="{{ $reservation->id }}">
+                                    
+                                    <div class="form-group">
+                                        <label for="card-holder" class="form-label">Card Holder Name</label>
+                                        <input type="text" id="card-holder" class="form-input" placeholder="Full name on card" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="card-number" class="form-label">Card Number</label>
+                                        <input type="text" id="card-number" class="form-input" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" required>
+                                    </div>
+                                    
+                                    <div class="payment-card-row">
+                                        <div class="form-group">
+                                            <label for="card-expiry" class="form-label">Expiration Date</label>
+                                            <input type="text" id="card-expiry" class="form-input" placeholder="MM/YY" maxlength="5" required>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="card-cvc" class="form-label">Security Code (CVC)</label>
+                                            <input type="text" id="card-cvc" class="form-input" placeholder="CVC" maxlength="3" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="card-errors" role="alert"></div>
+                                    
+                                    <button type="submit" id="payment-button" class="btn-payment" disabled>
+                                        <span id="spinner" class="spinner"></span>
+                                        Pay {{ number_format($reservation->total_price) }} MAD
+                                    </button>
+                                </form>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -642,4 +744,116 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only run this script if the payment form exists
+        if (document.getElementById('payment-form')) {
+            const paymentForm = document.getElementById('payment-form');
+            const paymentButton = document.getElementById('payment-button');
+            const spinner = document.getElementById('spinner');
+            const cardHolder = document.getElementById('card-holder');
+            const cardNumber = document.getElementById('card-number');
+            const cardExpiry = document.getElementById('card-expiry');
+            const cardCvc = document.getElementById('card-cvc');
+            const cardErrors = document.getElementById('card-errors');
+            
+            // Format card number with spaces
+            cardNumber.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                let formattedValue = '';
+                
+                for (let i = 0; i < value.length; i++) {
+                    if (i > 0 && i % 4 === 0) {
+                        formattedValue += ' ';
+                    }
+                    formattedValue += value[i];
+                }
+                
+                e.target.value = formattedValue;
+            });
+            
+            // Format expiry date
+            cardExpiry.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                
+                if (value.length > 2) {
+                    e.target.value = value.substring(0, 2) + '/' + value.substring(2);
+                } else {
+                    e.target.value = value;
+                }
+            });
+            
+            // Only allow numbers for CVC
+            cardCvc.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/[^0-9]/gi, '');
+            });
+            
+            // Check form validity on input
+            function checkFormValidity() {
+                const isNameValid = cardHolder.value.trim().length > 3;
+                const isCardNumberValid = cardNumber.value.replace(/\s+/g, '').length === 16;
+                const isExpiryValid = /^\d{2}\/\d{2}$/.test(cardExpiry.value);
+                const isCvcValid = cardCvc.value.length === 3;
+                
+                // Simple validation
+                if (!isNameValid) {
+                    cardErrors.textContent = 'Please enter the cardholder name';
+                    paymentButton.disabled = true;
+                    return;}
+                
+                if (!isCardNumberValid) {
+                    cardErrors.textContent = 'Please enter a valid 16-digit card number';
+                    paymentButton.disabled = true;
+                    return;
+                }
+                
+                if (!isExpiryValid) {
+                    cardErrors.textContent = 'Please enter a valid expiration date (MM/YY)';
+                    paymentButton.disabled = true;
+                    return;
+                }
+                
+                if (!isCvcValid) {
+                    cardErrors.textContent = 'Please enter a valid 3-digit CVC code';
+                    paymentButton.disabled = true;
+                    return;
+                }
+                
+                // All validations passed
+                cardErrors.textContent = '';
+                paymentButton.disabled = false;
+            }
+            
+            // Add event listeners to all form fields
+            cardHolder.addEventListener('input', checkFormValidity);
+            cardNumber.addEventListener('input', checkFormValidity);
+            cardExpiry.addEventListener('input', checkFormValidity);
+            cardCvc.addEventListener('input', checkFormValidity);
+            
+            // Handle form submission
+            paymentForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Show spinner
+                spinner.style.display = 'inline-block';
+                paymentButton.disabled = true;
+                
+                // In a real implementation, you would send the card data to your server
+                // or use a payment processor's JS library here
+                
+                // Simulate payment processing
+                setTimeout(function() {
+                    // Submit the form
+                    paymentForm.submit();
+                }, 1500);
+            });
+            
+            // Initial check
+            checkFormValidity();
+        }
+    });
+</script>
 @endsection

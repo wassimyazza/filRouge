@@ -291,7 +291,7 @@
     <h2 class="text-2xl font-bold text-gray-900 mb-8">Explore Morocco's Top Destinations</h2>
     
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <a href="{{ route('properties.index', ['city' => 'Marrakech']) }}" class="city-card city-marrakech">
+        <a style="background-image: url({{ asset('storage/img/marrakech.jpg') }})" href="{{ route('properties.index', ['city' => 'Marrakech']) }}" class="city-card city-marrakech">
             <div class="city-overlay"></div>
             <div class="absolute bottom-0 left-0 p-5 text-white">
                 <h3 class="text-xl font-bold">Marrakech</h3>
@@ -299,15 +299,15 @@
             </div>
         </a>
         
-        <a href="{{ route('properties.index', ['city' => 'Casablanca']) }}" class="city-card city-casablanca">
+        <a style="background-image: url({{ asset('storage/img/casablanca.jpg') }})" href="{{ route('properties.index', ['city' => 'Casablanca']) }}" class="city-card city-casablanca">
             <div class="city-overlay"></div>
-            <div class="absolute bottom-0 left-0 p-5 text-white">
+            <div style="background-image: " class="absolute bottom-0 left-0 p-5 text-white">
                 <h3 class="text-xl font-bold">Casablanca</h3>
                 <p class="text-sm mt-1 opacity-90">Modern metropolis</p>
             </div>
         </a>
         
-        <a href="{{ route('properties.index', ['city' => 'Fes']) }}" class="city-card city-fes">
+        <a style="background-image: url({{ asset('storage/img/fes.jpg') }})" href="{{ route('properties.index', ['city' => 'Fes']) }}" class="city-card city-fes">
             <div class="city-overlay"></div>
             <div class="absolute bottom-0 left-0 p-5 text-white">
                 <h3 class="text-xl font-bold">Fes</h3>
@@ -315,7 +315,7 @@
             </div>
         </a>
         
-        <a href="{{ route('properties.index', ['city' => 'Chefchaouen']) }}" class="city-card city-chefchaouen">
+        <a style="background-image: url({{ asset('storage/img/chafchaouen.jpg') }})" href="{{ route('properties.index', ['city' => 'Chefchaouen']) }}" class="city-card city-chefchaouen">
             <div class="city-overlay"></div>
             <div class="absolute bottom-0 left-0 p-5 text-white">
                 <h3 class="text-xl font-bold">Chefchaouen</h3>
@@ -354,10 +354,6 @@
                         </a>
                     @endauth
                 </div>
-            </div>
-            <div class="md:w-2/5 flex justify-center p-6">
-                <img src="https://images.unsplash.com/photo-1594743948645-e35e4c1dc03c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                     alt="Moroccan Riad" class="rounded-lg shadow-lg max-h-80 object-cover">
             </div>
         </div>
     </div>

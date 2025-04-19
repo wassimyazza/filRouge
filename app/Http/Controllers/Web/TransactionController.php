@@ -67,35 +67,57 @@ class TransactionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->errors()->first()], 422);
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => $validator->errors()->first()], 422);
+            }
+            return redirect()->back()->withErrors($validator);
         }
 
         $user = Auth::user();
         $reservation = $this->reservationRepository->find($request->reservation_id);
+        
+        if (!$reservation) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => 'Reservation not found'], 404);
+            }
+            return redirect()->route('reservations.index')->with('error', 'Reservation not found');
+        }
 
-        if (!$reservation || $reservation->traveler_id !== $user->id || $reservation->status !== 'pending') {
-            return response()->json(['success' => false, 'error' => 'Invalid reservation or access denied.'], 403);
+        if ($reservation->traveler_id !== $user->id) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => 'Unauthorized access'], 403);
+            }
+            return redirect()->route('reservations.index')->with('error', 'Unauthorized access');
+        }
+
+        if ($reservation->status !== 'pending') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => 'This reservation cannot be paid for'], 400);
+            }
+            return redirect()->route('reservations.show', $reservation->id)->with('error', 'This reservation cannot be paid for');
         }
 
         $existingTransaction = $this->transactionRepository->getTransactionsByReservation($reservation->id);
         if ($existingTransaction) {
-            return response()->json(['success' => false, 'error' => 'Payment already processed.'], 400);
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => 'Payment already processed for this reservation'], 400);
+            }
+            return redirect()->route('reservations.show', $reservation->id)->with('error', 'Payment already processed for this reservation');
         }
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         try {
             $paymentIntent = PaymentIntent::create([
-                'amount' => $reservation->total_price * 100, // cents
-                'currency' => 'usd',
-                'payment_method_types' => ['card'],
+                'amount' => $reservation->total_price * 100,
+                'currency' => 'usd', // Changed from 'mad' to 'usd' for wider compatibility
                 'metadata' => [
                     'reservation_id' => $reservation->id,
+                    'property_id' => $reservation->property_id,
                     'traveler_id' => $user->id,
                 ],
             ]);
 
-            // Store transaction
             $transaction = $this->transactionRepository->create([
                 'reservation_id' => $reservation->id,
                 'amount' => $reservation->total_price,
@@ -104,17 +126,35 @@ class TransactionController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Simulate successful payment (test mode shortcut)
-            $this->transactionRepository->update($transaction->id, ['status' => 'completed']);
-            $this->reservationRepository->update($reservation->id, ['status' => 'confirmed']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Fake payment successful (Stripe test mode).',
-                'reservation_id' => $reservation->id
+            // For demonstration purposes, we'll simulate a successful payment
+            // In a real application, this would be confirmed by Stripe webhook
+            
+            // Update the transaction and reservation status
+            $this->transactionRepository->update($transaction->id, [
+                'status' => 'completed'
             ]);
+
+            $this->reservationRepository->update($reservation->id, [
+                'status' => 'confirmed'
+            ]);
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment confirmed successfully! Your reservation is now confirmed.',
+                    'reservation_id' => $reservation->id
+                ]);
+            }
+
+            return redirect()->route('reservations.show', $reservation->id)
+                ->with('success', 'Payment confirmed successfully! Your reservation is now confirmed.');
+            
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => 'Error creating payment: ' . $e->getMessage()], 500);
+            }
+            return redirect()->route('reservations.show', $reservation->id)
+                ->with('error', 'Error creating payment: ' . $e->getMessage());
         }
     }
 

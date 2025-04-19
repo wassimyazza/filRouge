@@ -140,7 +140,7 @@
         </div>
         <div class="detail-row">
             <span class="detail-label">Total Price:</span>
-            <span class="price-total">${{ $reservation->total_price }}</span>
+            <span class="price-total">{{ number_format($reservation->total_price, 0, '.', ',') }} MAD</span>
         </div>
     </div>
     
@@ -159,7 +159,7 @@
             </div>
             
             <button type="submit" class="btn-payment">
-                Pay ${{ $reservation->total_price }}
+                Pay {{ number_format($reservation->total_price, 0, '.', ',') }} MAD
             </button>
         </form>
         
