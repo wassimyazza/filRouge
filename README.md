@@ -1,4 +1,4 @@
-# StayMaroc - Plateforme de Location de Propriétés
+# Stay&Traveler - Plateforme de Location de Propriétés
 
 Projet Fil Rouge – 1ère année Développement Web  
 YouCode – Safi | SIMPLON.CO  
